@@ -43,4 +43,13 @@ final class CalloutStripperTest extends TestCase
 
         self::assertSame("Content.\n\n", $this->stripper->strip($input));
     }
+
+    public function testDoesNotSynthesizeBlankLinesForMidDocumentCallouts(): void
+    {
+        // Regression test: callout with no blank lines before or after should not
+        // have blank lines synthesized around it in the output.
+        $input = "Before.\n> [!note] x\n> more\nAfter.";
+
+        self::assertSame("Before.\nAfter.", $this->stripper->strip($input));
+    }
 }

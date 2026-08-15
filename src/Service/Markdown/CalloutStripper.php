@@ -19,9 +19,11 @@ final class CalloutStripper
                 while ($i < $count && preg_match('/^>/', $lines[$i]) === 1) {
                     ++$i;
                 }
-                // Add empty line to replace callout unless next line is already blank
-                // (but do add if we're at the start of document)
-                if ($i >= $count || $lines[$i] !== '' || empty($result)) {
+                // Add empty line placeholder only at document boundaries:
+                // - at end of file ($i >= $count)
+                // - at start of document (empty($result), nothing emitted yet)
+                // Do NOT synthesize blanks for mid-document callouts.
+                if ($i >= $count || empty($result)) {
                     $result[] = '';
                 }
                 continue;
