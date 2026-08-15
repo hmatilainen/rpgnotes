@@ -1,0 +1,4 @@
+var/
+vendor/
+.git/
+tests/Fixtures/vault/.git
