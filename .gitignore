@@ -1,0 +1,7 @@
+/.worktrees/
+/.superpowers/
+/var/
+/vendor/
+.env.local
+.env.local.php
+.env.*.local
