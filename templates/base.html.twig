@@ -8,6 +8,14 @@
 <body>
     <header class="navbar">
         <a href="/">RPG Notes — Forgotten Realms</a>
+        <nav class="navbar-auth">
+            {% if app.user %}
+                <span>Logged in as {{ app.user.userIdentifier }}</span>
+                <a href="{{ path('logout') }}">Log out</a>
+            {% else %}
+                <a href="{{ path('login') }}">Log in</a>
+            {% endif %}
+        </nav>
     </header>
     <div class="layout">
         <nav class="sidebar">
