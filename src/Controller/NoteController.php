@@ -22,8 +22,9 @@ final class NoteController extends AbstractController
     public function __invoke(string $slug): Response
     {
         $note = $this->notes->findOneBySlug($slug);
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
 
-        if ($note === null) {
+        if ($note === null || ($note->isHidden() && !$isAdmin)) {
             throw $this->createNotFoundException('Note not found.');
         }
 
@@ -31,9 +32,9 @@ final class NoteController extends AbstractController
 
         return $this->render('note/show.html.twig', [
             'note' => $note,
-            'previousReport' => $reportNumber !== null ? $this->notes->findPreviousReport($reportNumber) : null,
-            'nextReport' => $reportNumber !== null ? $this->notes->findNextReport($reportNumber) : null,
-            'sidebar' => $this->sidebar->build(),
+            'previousReport' => $reportNumber !== null ? $this->notes->findPreviousReport($reportNumber, $isAdmin) : null,
+            'nextReport' => $reportNumber !== null ? $this->notes->findNextReport($reportNumber, $isAdmin) : null,
+            'sidebar' => $this->sidebar->build($isAdmin),
         ]);
     }
 }

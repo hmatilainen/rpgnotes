@@ -12,11 +12,11 @@ final class SidebarBuilder
     {
     }
 
-    public function build(): SidebarNode
+    public function build(bool $includeHidden = false): SidebarNode
     {
         $root = new SidebarNode('');
 
-        foreach ($this->notes->findAllForSidebar() as $note) {
+        foreach ($this->notes->findAllForSidebar($includeHidden) as $note) {
             $segments = explode('/', $note->getVaultPath());
             array_pop($segments); // drop filename, keep only folder segments
 

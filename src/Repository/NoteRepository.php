@@ -50,14 +50,18 @@ class NoteRepository extends ServiceEntityRepository
     /**
      * @return Note[]
      */
-    public function findAllForSidebar(): array
+    public function findAllForSidebar(bool $includeHidden = false): array
     {
-        return $this->createQueryBuilder('n')
+        $qb = $this->createQueryBuilder('n')
             ->where('n.topLevelFolder != :reports')
             ->setParameter('reports', 'Reports')
-            ->orderBy('n.vaultPath', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->orderBy('n.vaultPath', 'ASC');
+
+        if (!$includeHidden) {
+            $qb->andWhere('n.hidden = false');
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -67,61 +71,81 @@ class NoteRepository extends ServiceEntityRepository
      *
      * @return Note[]
      */
-    public function findReportsPaginated(int $page, int $perPage): array
+    public function findReportsPaginated(int $page, int $perPage, bool $includeHidden = false): array
     {
-        return $this->createQueryBuilder('n')
+        $qb = $this->createQueryBuilder('n')
             ->where('n.reportNumber IS NOT NULL')
             ->orderBy('n.reportNumber', 'DESC')
             ->addOrderBy('n.id', 'DESC')
             ->setFirstResult(($page - 1) * $perPage + 1)
-            ->setMaxResults($perPage)
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($perPage);
+
+        if (!$includeHidden) {
+            $qb->andWhere('n.hidden = false');
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
-    public function countReports(): int
+    public function countReports(bool $includeHidden = false): int
     {
-        return (int) $this->createQueryBuilder('n')
+        $qb = $this->createQueryBuilder('n')
             ->select('COUNT(n.id)')
-            ->where('n.reportNumber IS NOT NULL')
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->where('n.reportNumber IS NOT NULL');
+
+        if (!$includeHidden) {
+            $qb->andWhere('n.hidden = false');
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
-    public function findNewestReport(): ?Note
+    public function findNewestReport(bool $includeHidden = false): ?Note
     {
-        return $this->createQueryBuilder('n')
+        $qb = $this->createQueryBuilder('n')
             ->where('n.reportNumber IS NOT NULL')
             ->orderBy('n.reportNumber', 'DESC')
             ->addOrderBy('n.id', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+            ->setMaxResults(1);
+
+        if (!$includeHidden) {
+            $qb->andWhere('n.hidden = false');
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
-    public function findPreviousReport(int $reportNumber): ?Note
+    public function findPreviousReport(int $reportNumber, bool $includeHidden = false): ?Note
     {
-        return $this->createQueryBuilder('n')
+        $qb = $this->createQueryBuilder('n')
             ->where('n.reportNumber IS NOT NULL')
             ->andWhere('n.reportNumber < :reportNumber')
             ->setParameter('reportNumber', $reportNumber)
             ->orderBy('n.reportNumber', 'DESC')
             ->addOrderBy('n.id', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+            ->setMaxResults(1);
+
+        if (!$includeHidden) {
+            $qb->andWhere('n.hidden = false');
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
-    public function findNextReport(int $reportNumber): ?Note
+    public function findNextReport(int $reportNumber, bool $includeHidden = false): ?Note
     {
-        return $this->createQueryBuilder('n')
+        $qb = $this->createQueryBuilder('n')
             ->where('n.reportNumber IS NOT NULL')
             ->andWhere('n.reportNumber > :reportNumber')
             ->setParameter('reportNumber', $reportNumber)
             ->orderBy('n.reportNumber', 'ASC')
             ->addOrderBy('n.id', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+            ->setMaxResults(1);
+
+        if (!$includeHidden) {
+            $qb->andWhere('n.hidden = false');
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }

@@ -25,14 +25,15 @@ final class FrontPageController extends AbstractController
     public function __invoke(Request $request): Response
     {
         $page = max(1, $request->query->getInt('page', 1));
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
 
-        $featuredReport = $page === 1 ? $this->notes->findNewestReport() : null;
+        $featuredReport = $page === 1 ? $this->notes->findNewestReport($isAdmin) : null;
         $featuredPreviousReport = $featuredReport !== null
-            ? $this->notes->findPreviousReport($featuredReport->getReportNumber())
+            ? $this->notes->findPreviousReport($featuredReport->getReportNumber(), $isAdmin)
             : null;
 
-        $reports = $this->notes->findReportsPaginated($page, self::PER_PAGE);
-        $total = $this->notes->countReports();
+        $reports = $this->notes->findReportsPaginated($page, self::PER_PAGE, $isAdmin);
+        $total = $this->notes->countReports($isAdmin);
         $listTotal = max(0, $total - 1);
 
         return $this->render('front_page/index.html.twig', [
@@ -41,7 +42,7 @@ final class FrontPageController extends AbstractController
             'reports' => $reports,
             'page' => $page,
             'totalPages' => max(1, (int) ceil($listTotal / self::PER_PAGE)),
-            'sidebar' => $this->sidebar->build(),
+            'sidebar' => $this->sidebar->build($isAdmin),
         ]);
     }
 }

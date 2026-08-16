@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Functional\Controller;
 
 use App\Entity\Note;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class FrontPageControllerTest extends WebTestCase
 {
@@ -31,6 +33,7 @@ final class FrontPageControllerTest extends WebTestCase
     {
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $em->createQuery('DELETE FROM App\Entity\Note')->execute();
+        $em->createQuery('DELETE FROM App\Entity\User')->execute();
     }
 
     public function testPage1ShowsFeaturedNewestReportInFullAndExcludesItFromTheListBelow(): void
@@ -141,5 +144,35 @@ final class FrontPageControllerTest extends WebTestCase
         $em->flush();
 
         return $note;
+    }
+
+    public function testHiddenReportExcludedForAnonymousButShownForAdmin(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $this->makeReport($em, 1, 'report-1', '<p>Visible content.</p>');
+        $hidden = $this->makeReport($em, 2, 'report-2', '<p>Hidden content.</p>');
+        $hidden->setHidden(true);
+        $em->flush();
+
+        $client->request('GET', '/');
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringNotContainsString('Hidden content.', $content);
+        self::assertStringContainsString('Visible content.', $content);
+
+        $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        $admin = new User();
+        $admin->setLabel('front-page-admin');
+        $admin->setUsername('front-page-admin');
+        $admin->setRole('ROLE_ADMIN');
+        $admin->setPasswordHash($hasher->hashPassword($admin, 'password123'));
+        $em->persist($admin);
+        $em->flush();
+
+        $client->loginUser($admin);
+        $client->request('GET', '/');
+        $adminContent = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('Hidden content.', $adminContent);
     }
 }

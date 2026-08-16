@@ -60,4 +60,32 @@ final class SidebarBuilderTest extends KernelTestCase
 
         $em->createQuery('DELETE FROM App\Entity\Note')->execute();
     }
+
+    public function testIncludeHiddenControlsWhetherHiddenNotesAppear(): void
+    {
+        self::bootKernel();
+        $container = static::getContainer();
+        $em = $container->get(EntityManagerInterface::class);
+        $builder = $container->get(SidebarBuilder::class);
+
+        $em->createQuery('DELETE FROM App\Entity\Note')->execute();
+
+        $hidden = new Note();
+        $hidden->setVaultPath('A - GM/Secrets.md');
+        $hidden->setSlug('a-gm/secrets');
+        $hidden->setTitle('Secrets');
+        $hidden->setTopLevelFolder('A - GM');
+        $hidden->setHtml('<p></p>');
+        $hidden->setHidden(true);
+        $em->persist($hidden);
+        $em->flush();
+
+        $rootWithoutHidden = $builder->build(false);
+        self::assertArrayNotHasKey('A - GM', $rootWithoutHidden->getFolders());
+
+        $rootWithHidden = $builder->build(true);
+        self::assertArrayHasKey('A - GM', $rootWithHidden->getFolders());
+
+        $em->createQuery('DELETE FROM App\Entity\Note')->execute();
+    }
 }
