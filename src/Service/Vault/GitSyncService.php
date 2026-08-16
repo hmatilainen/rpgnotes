@@ -23,7 +23,11 @@ class GitSyncService
         }
 
         $this->run(['git', '-C', $this->vaultPath, 'fetch', 'origin']);
-        $this->run(['git', '-C', $this->vaultPath, 'reset', '--hard', 'origin/main']);
+        // origin/HEAD tracks whatever branch the remote actually treats as
+        // its default (set automatically on clone) — don't assume "main",
+        // since plenty of repos (including this one) still default to
+        // "master" or something else entirely.
+        $this->run(['git', '-C', $this->vaultPath, 'reset', '--hard', 'origin/HEAD']);
     }
 
     /**
