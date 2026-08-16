@@ -2,7 +2,7 @@
     {% for folder in node.folders %}
         {% set folderPath = path is not empty ? path ~ '/' ~ folder.name : folder.name %}
         <li>
-            <details{% if depth == 0 %} open{% endif %} data-path="{{ folderPath }}">
+            <details data-path="{{ folderPath }}">
                 <summary>{{ folder.name }}</summary>
                 {% include 'partials/_sidebar.html.twig' with { node: folder, depth: depth + 1, path: folderPath } %}
             </details>
