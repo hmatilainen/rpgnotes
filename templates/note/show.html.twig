@@ -4,6 +4,9 @@
 
 {% block body %}
     <article>
+        {% if not (note.html|trim starts with '<h1') %}
+            <h1>{{ note.title }}</h1>
+        {% endif %}
         {{ note.html|raw }}
     </article>
 {% endblock %}
