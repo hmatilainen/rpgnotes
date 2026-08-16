@@ -6,10 +6,12 @@
     <h1>Players</h1>
 
     <form method="post" action="{{ path('admin_players_add') }}">
-        <label for="label">Player name</label>
-        <input type="text" id="label" name="label" required>
+        <div class="form-group">
+            <label for="label">Player name</label>
+            <input type="text" id="label" name="label" required>
+        </div>
         <input type="hidden" name="_token" value="{{ csrf_token('admin_players_add') }}">
-        <button type="submit">Add player</button>
+        <button type="submit" class="btn">Add player</button>
     </form>
 
     <table>
@@ -28,7 +30,7 @@
                     <td>{{ player.username ?: '—' }}</td>
                     <td>
                         {% if player.inviteToken and player.isInviteValid %}
-                            <a href="{{ url('register', {token: player.inviteToken}) }}">{{ url('register', {token: player.inviteToken}) }}</a>
+                            <a class="invite-link" href="{{ url('register', {token: player.inviteToken}) }}" title="{{ url('register', {token: player.inviteToken}) }}">{{ url('register', {token: player.inviteToken}) }}</a>
                         {% else %}
                             no active invite
                         {% endif %}
@@ -36,7 +38,7 @@
                     <td>
                         <form method="post" action="{{ path('admin_players_invite', {id: player.id}) }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('admin_players_invite') }}">
-                            <button type="submit">{{ player.inviteToken and player.isInviteValid ? 'Regenerate invite' : 'Generate invite link' }}</button>
+                            <button type="submit" class="btn">{{ player.inviteToken and player.isInviteValid ? 'Regenerate invite' : 'Generate invite link' }}</button>
                         </form>
                     </td>
                 </tr>

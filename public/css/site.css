@@ -32,17 +32,36 @@ a:hover {
     background: var(--color-bg);
     border-bottom: 2px solid var(--color-border);
     padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.navbar a {
+.navbar > a {
     font-size: 22px;
     font-weight: bold;
     color: var(--color-text);
 }
 
-.navbar a:hover {
+.navbar > a:hover {
     color: var(--color-accent);
     text-decoration: none;
+}
+
+.navbar-auth {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.95em;
+}
+
+.navbar-auth a {
+    color: var(--color-text);
+    font-weight: bold;
+}
+
+.navbar-auth a:hover {
+    color: var(--color-accent);
 }
 
 .navbar-logout-form {
@@ -53,7 +72,6 @@ a:hover {
 
 .navbar-logout-button {
     font: inherit;
-    font-size: 22px;
     font-weight: bold;
     color: var(--color-text);
     background: none;
@@ -168,4 +186,92 @@ a:hover {
 
 .report-nav-next {
     margin-left: auto;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 400px;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="password"] {
+    font: inherit;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    background: #fffaf0;
+    color: var(--color-text);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.btn {
+    font: inherit;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 3px;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: var(--color-accent-hover);
+}
+
+.form-error {
+    color: #a33322;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+th {
+    border-bottom: 2px solid var(--color-border);
+}
+
+.invite-link {
+    display: inline-block;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.hidden-paths-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 16px;
+}
+
+.hidden-paths-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
 }
