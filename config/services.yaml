@@ -45,3 +45,7 @@ services:
         arguments:
             $vaultPath: '%env(VAULT_PATH)%'
             $repoUrl: '%env(VAULT_REPO_URL)%'
+
+    App\Command\SyncNotesCommand:
+        arguments:
+            $vaultPath: '%env(VAULT_PATH)%'

@@ -17,7 +17,7 @@ use App\Service\Markdown\WikilinkTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use League\CommonMark\ConverterInterface;
 
-final class NoteIndexer
+class NoteIndexer
 {
     /**
      * @param string[] $excludedTopLevelDirs

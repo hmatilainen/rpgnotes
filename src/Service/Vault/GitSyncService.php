@@ -6,7 +6,7 @@ namespace App\Service\Vault;
 
 use Symfony\Component\Process\Process;
 
-final class GitSyncService
+class GitSyncService
 {
     public function __construct(
         private readonly string $vaultPath,
