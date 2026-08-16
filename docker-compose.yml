@@ -9,8 +9,6 @@ services:
       APP_ENV: dev
       DATABASE_URL: "postgresql://app:app@db:5432/app?serverVersion=16&charset=utf8"
       VAULT_PATH: /var/vault/repo
-      VAULT_REPO_URL: ${VAULT_REPO_URL}
-      SYNC_WEBHOOK_SECRET: ${SYNC_WEBHOOK_SECRET}
     volumes:
       - ./:/app
       - vault_data:/var/vault
