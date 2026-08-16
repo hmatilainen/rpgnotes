@@ -67,4 +67,108 @@ final class NoteControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(404);
     }
+
+    public function testReportNoteShowsPreviousAndNextLinks(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $report1 = $this->makeReport($em, 1, 'reports/report-1');
+        $report2 = $this->makeReport($em, 2, 'reports/report-2');
+        $report3 = $this->makeReport($em, 3, 'reports/report-3');
+
+        $client->request('GET', '/notes/reports/report-2');
+
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('href="/notes/reports/report-1" class="report-nav-prev"', $content);
+        self::assertStringContainsString('href="/notes/reports/report-3" class="report-nav-next"', $content);
+
+        foreach ([$report1, $report2, $report3] as $note) {
+            $em->remove($note);
+        }
+        $em->flush();
+    }
+
+    public function testNewestReportOmitsNextLink(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $report1 = $this->makeReport($em, 1, 'reports/report-1');
+        $report2 = $this->makeReport($em, 2, 'reports/report-2');
+
+        $client->request('GET', '/notes/reports/report-2');
+
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('report-nav-prev', $content);
+        self::assertStringNotContainsString('report-nav-next', $content);
+
+        foreach ([$report1, $report2] as $note) {
+            $em->remove($note);
+        }
+        $em->flush();
+    }
+
+    public function testOldestReportOmitsPreviousLink(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $report1 = $this->makeReport($em, 1, 'reports/report-1');
+        $report2 = $this->makeReport($em, 2, 'reports/report-2');
+
+        $client->request('GET', '/notes/reports/report-1');
+
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringNotContainsString('report-nav-prev', $content);
+        self::assertStringContainsString('report-nav-next', $content);
+
+        foreach ([$report1, $report2] as $note) {
+            $em->remove($note);
+        }
+        $em->flush();
+    }
+
+    public function testNonReportNoteShowsNoNavigationLinks(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $note = new Note();
+        $note->setVaultPath('Locations/Millbrook.md');
+        $note->setSlug('locations/millbrook');
+        $note->setTitle('Millbrook');
+        $note->setTopLevelFolder('Locations');
+        $note->setHtml('<p>A quiet crossroads village.</p>');
+        $em->persist($note);
+        $em->flush();
+
+        $client->request('GET', '/notes/locations/millbrook');
+
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringNotContainsString('report-nav-prev', $content);
+        self::assertStringNotContainsString('report-nav-next', $content);
+
+        $em->remove($note);
+        $em->flush();
+    }
+
+    private function makeReport(EntityManagerInterface $em, int $number, string $slug): Note
+    {
+        $note = new Note();
+        $note->setVaultPath('Reports/report-' . $number . '.md');
+        $note->setSlug($slug);
+        $note->setTitle('Report ' . $number);
+        $note->setTopLevelFolder('Reports');
+        $note->setHtml('<p>content</p>');
+        $note->setReportNumber($number);
+        $em->persist($note);
+        $em->flush();
+
+        return $note;
+    }
 }

@@ -27,8 +27,12 @@ final class NoteController extends AbstractController
             throw $this->createNotFoundException('Note not found.');
         }
 
+        $reportNumber = $note->getReportNumber();
+
         return $this->render('note/show.html.twig', [
             'note' => $note,
+            'previousReport' => $reportNumber !== null ? $this->notes->findPreviousReport($reportNumber) : null,
+            'nextReport' => $reportNumber !== null ? $this->notes->findNextReport($reportNumber) : null,
             'sidebar' => $this->sidebar->build(),
         ]);
     }

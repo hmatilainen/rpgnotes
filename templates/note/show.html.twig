@@ -9,4 +9,14 @@
         {% endif %}
         {{ note.html|raw }}
     </article>
+    {% if note.reportNumber is not null and (previousReport or nextReport) %}
+        <nav class="report-nav">
+            {% if previousReport %}
+                <a href="/notes/{{ previousReport.slug }}" class="report-nav-prev">← Previous session</a>
+            {% endif %}
+            {% if nextReport %}
+                <a href="/notes/{{ nextReport.slug }}" class="report-nav-next">Next session →</a>
+            {% endif %}
+        </nav>
+    {% endif %}
 {% endblock %}
