@@ -72,4 +72,20 @@ final class GitSyncServiceTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $service->sync();
     }
+
+    public function testExceptionMessageDoesNotLeakCredentialsFromRepoUrl(): void
+    {
+        $service = new GitSyncService(
+            $this->checkoutPath,
+            'https://user:secret123@nonexistent.invalid/repo.git'
+        );
+
+        try {
+            $service->sync();
+            self::fail('Expected a RuntimeException to be thrown.');
+        } catch (\RuntimeException $e) {
+            self::assertStringNotContainsString('secret123', $e->getMessage());
+            self::assertStringContainsString('https://***@nonexistent.invalid/repo.git', $e->getMessage());
+        }
+    }
 }

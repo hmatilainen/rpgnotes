@@ -38,9 +38,14 @@ class GitSyncService
         if (!$process->isSuccessful()) {
             throw new \RuntimeException(sprintf(
                 'Git command "%s" failed: %s',
-                implode(' ', $command),
-                $process->getErrorOutput()
+                $this->redactCredentials(implode(' ', $command)),
+                $this->redactCredentials($process->getErrorOutput())
             ));
         }
+    }
+
+    private function redactCredentials(string $value): string
+    {
+        return preg_replace('#(https?://)[^/@\s]+@#', '$1***@', $value) ?? $value;
     }
 }
