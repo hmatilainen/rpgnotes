@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hidden paths — Admin — RPG Notes{% endblock %}
+
+{% block body %}
+    <h1>Hidden paths</h1>
+    <p>Folders or individual files, relative to the vault root (e.g. "A - GM" or "Journal/Session12.md"). Changes take effect on the next sync.</p>
+
+    <form method="post" action="{{ path('admin_hidden_paths_add') }}">
+        <label for="path">Path</label>
+        <input type="text" id="path" name="path" required>
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_hidden_paths_add') }}">
+        <button type="submit">Add</button>
+    </form>
+
+    <ul>
+        {% for hiddenPath in hiddenPaths %}
+            <li>
+                {{ hiddenPath.path }}
+                <form method="post" action="{{ path('admin_hidden_paths_remove', {id: hiddenPath.id}) }}" style="display:inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin_hidden_paths_remove') }}">
+                    <button type="submit">Remove</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
