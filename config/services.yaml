@@ -35,6 +35,10 @@ services:
 
     League\CommonMark\ConverterInterface:
         class: League\CommonMark\CommonMarkConverter
+        arguments:
+            $config:
+                html_input: 'escape'
+                allow_unsafe_links: false
 
     App\Service\Vault\GitSyncService:
         arguments:

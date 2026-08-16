@@ -135,6 +135,31 @@ final class NoteIndexerTest extends KernelTestCase
         self::assertMatchesRegularExpression('#^people/untitled-[0-9a-f]{8}$#', $note->getSlug());
     }
 
+    public function testEscapesRawHtmlAndStripsUnsafeLinksFromMarkdown(): void
+    {
+        $vault = sys_get_temp_dir() . '/rpgnotes-unsafe-html-vault-' . uniqid();
+        mkdir($vault . '/People', 0777, true);
+        file_put_contents(
+            $vault . '/People/Unsafe.md',
+            "# Unsafe\n\n<script>alert(1)</script>\n\n<img src=x onerror=\"alert(1)\">\n\n[click](javascript:alert(1))\n"
+        );
+
+        $this->indexer->index($vault);
+
+        $note = $this->notes->findOneByVaultPath('People/Unsafe.md');
+
+        self::assertNotNull($note);
+        // Raw HTML is escaped rather than executed: the tags appear as inert
+        // visible text (entity-encoded), not as live markup.
+        self::assertStringNotContainsString('<script>', $note->getHtml());
+        self::assertStringContainsString('&lt;script&gt;', $note->getHtml());
+        self::assertStringNotContainsString('<img src=x onerror=', $note->getHtml());
+        self::assertStringContainsString('&lt;img src=x onerror=', $note->getHtml());
+        // The javascript: link is dropped entirely rather than kept as an href.
+        self::assertStringNotContainsString('javascript:', $note->getHtml());
+        self::assertStringNotContainsString('href=', $note->getHtml());
+    }
+
     protected function tearDown(): void
     {
         $this->em->createQuery('DELETE FROM App\Entity\Note')->execute();
