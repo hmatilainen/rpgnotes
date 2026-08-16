@@ -20,7 +20,7 @@ final class NoteControllerTest extends WebTestCase
         $note->setSlug('locations/deerwater');
         $note->setTitle('Deerwater');
         $note->setTopLevelFolder('Locations');
-        $note->setHtml('<p>A small settlement.</p>');
+        $note->setHtml('<h1>Deerwater</h1><p>A small settlement.</p>');
         $em->persist($note);
         $em->flush();
 
