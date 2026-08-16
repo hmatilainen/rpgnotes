@@ -17,6 +17,7 @@ security:
                 login_path: login
                 check_path: login
                 default_target_path: front_page
+                enable_csrf: true
             logout:
                 path: logout
                 target: front_page
