@@ -1,0 +1,11 @@
+<ul>
+    {% for folder in node.folders %}
+        <li>
+            <strong>{{ folder.name }}</strong>
+            {% include 'partials/_sidebar.html.twig' with { node: folder } %}
+        </li>
+    {% endfor %}
+    {% for note in node.notes %}
+        <li><a href="/notes/{{ note.slug }}">{{ note.title }}</a></li>
+    {% endfor %}
+</ul>

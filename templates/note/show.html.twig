@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ note.title }} — RPG Notes{% endblock %}
+
+{% block body %}
+    <article>
+        <h1>{{ note.title }}</h1>
+        {{ note.html|raw }}
+    </article>
+{% endblock %}

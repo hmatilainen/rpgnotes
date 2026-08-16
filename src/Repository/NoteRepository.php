@@ -41,4 +41,22 @@ class NoteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findOneBySlug(string $slug): ?Note
+    {
+        return $this->findOneBy(['slug' => $slug]);
+    }
+
+    /**
+     * @return Note[]
+     */
+    public function findAllForSidebar(): array
+    {
+        return $this->createQueryBuilder('n')
+            ->where('n.topLevelFolder != :reports')
+            ->setParameter('reports', 'Reports')
+            ->orderBy('n.vaultPath', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
