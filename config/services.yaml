@@ -29,11 +29,6 @@ services:
     # please note that last definitions always *replace* previous ones
 
     App\Service\Vault\NoteIndexer:
-        # Public: nothing else in the container references NoteIndexer yet (its
-        # consumers, SyncNotesCommand and WebhookController, land in later tasks),
-        # so Symfony's dead-private-service removal would otherwise delete it and
-        # break KernelTestCase::getContainer()->get(NoteIndexer::class) in tests.
-        public: true
         arguments:
             $excludedTopLevelDirs: '%app.vault.excluded_dirs%'
             $hiddenTopLevelDirs: '%app.vault.hidden_dirs%'
@@ -49,3 +44,8 @@ services:
     App\Command\SyncNotesCommand:
         arguments:
             $vaultPath: '%env(VAULT_PATH)%'
+
+    App\Controller\WebhookController:
+        arguments:
+            $vaultPath: '%env(VAULT_PATH)%'
+            $webhookSecret: '%env(SYNC_WEBHOOK_SECRET)%'
