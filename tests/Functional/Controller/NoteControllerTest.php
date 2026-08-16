@@ -27,6 +27,7 @@ final class NoteControllerTest extends WebTestCase
         $client->request('GET', '/notes/locations/deerwater');
 
         self::assertResponseIsSuccessful();
+        self::assertSelectorCount(1, 'h1');
         self::assertSelectorTextContains('h1', 'Deerwater');
         self::assertStringContainsString('A small settlement.', (string) $client->getResponse()->getContent());
 
@@ -51,6 +52,7 @@ final class NoteControllerTest extends WebTestCase
         $client->request('GET', '/notes/locations/millhaven');
 
         self::assertResponseIsSuccessful();
+        self::assertSelectorCount(1, 'h1');
         self::assertSelectorTextContains('h1', 'Millhaven');
         self::assertStringContainsString('A quiet farming village.', (string) $client->getResponse()->getContent());
 
