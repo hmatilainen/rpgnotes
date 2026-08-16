@@ -45,6 +45,27 @@ a:hover {
     text-decoration: none;
 }
 
+.navbar-logout-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-logout-button {
+    font: inherit;
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--color-text);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.navbar-logout-button:hover {
+    color: var(--color-accent);
+}
+
 .layout {
     display: flex;
     align-items: flex-start;

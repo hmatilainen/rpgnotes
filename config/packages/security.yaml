@@ -21,6 +21,7 @@ security:
             logout:
                 path: logout
                 target: front_page
+                enable_csrf: true
 
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }

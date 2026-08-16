@@ -75,7 +75,7 @@ final class SecurityControllerTest extends WebTestCase
         ]);
         $client->followRedirect();
 
-        $client->request('GET', '/logout');
+        $client->submitForm('Log out');
         $client->followRedirect();
 
         self::assertSelectorExists('a[href="/login"]');

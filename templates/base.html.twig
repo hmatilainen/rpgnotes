@@ -14,7 +14,10 @@
                 {% if is_granted('ROLE_ADMIN') %}
                     <a href="{{ path('admin_dashboard') }}">Admin</a>
                 {% endif %}
-                <a href="{{ path('logout') }}">Log out</a>
+                <form method="post" action="{{ path('logout') }}" class="navbar-logout-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                    <button type="submit" class="navbar-logout-button">Log out</button>
+                </form>
             {% else %}
                 <a href="{{ path('login') }}">Log in</a>
             {% endif %}
