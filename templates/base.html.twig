@@ -11,6 +11,9 @@
         <nav class="navbar-auth">
             {% if app.user %}
                 <span>Logged in as {{ app.user.userIdentifier }}</span>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_dashboard') }}">Admin</a>
+                {% endif %}
                 <a href="{{ path('logout') }}">Log out</a>
             {% else %}
                 <a href="{{ path('login') }}">Log in</a>

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin — RPG Notes{% endblock %}
+
+{% block body %}
+    <h1>Admin</h1>
+    <ul>
+        <li><a href="{{ path('admin_players') }}">Players</a></li>
+        <li><a href="{{ path('admin_hidden_paths') }}">Hidden paths</a></li>
+    </ul>
+{% endblock %}
