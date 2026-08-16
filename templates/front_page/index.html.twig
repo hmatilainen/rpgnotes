@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Session Reports — RPG Notes{% endblock %}
+
+{% block body %}
+    <h1>Session Reports</h1>
+    <ul class="report-list">
+        {% for report in reports %}
+            <li>
+                <a href="/notes/{{ report.slug }}">{{ report.title }}</a>
+                {% if report.sessionDate %}
+                    <span class="report-date">{{ report.sessionDate|date('d.m.Y') }}</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <nav class="pagination">
+        {% if page > 1 %}
+            <a href="?page={{ page - 1 }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page }} of {{ totalPages }}</span>
+        {% if page < totalPages %}
+            <a href="?page={{ page + 1 }}">Next</a>
+        {% endif %}
+    </nav>
+{% endblock %}

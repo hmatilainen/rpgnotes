@@ -59,4 +59,27 @@ class NoteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return Note[]
+     */
+    public function findReportsPaginated(int $page, int $perPage): array
+    {
+        return $this->createQueryBuilder('n')
+            ->where('n.reportNumber IS NOT NULL')
+            ->orderBy('n.reportNumber', 'DESC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countReports(): int
+    {
+        return (int) $this->createQueryBuilder('n')
+            ->select('COUNT(n.id)')
+            ->where('n.reportNumber IS NOT NULL')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
