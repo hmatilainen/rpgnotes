@@ -147,4 +147,20 @@ docker compose exec app bin/phpunit
 
 Not yet configured. The site is intended to eventually live at
 `https://rpg.kuura.art`; production docker-compose, TLS, and DNS setup are
-still to do.
+still to do. Deliberately deferred until Phase 3 (below) ships, so the
+site isn't exposed publicly before player-facing features exist.
+
+## Roadmap
+
+- **Phase 1** — docker foundation, GitHub-synced read-only rendering site. ✅ Done.
+- **Phase 2** — admin account, invite-only player registration, admin-only
+  hidden content. ✅ Done.
+- **Phase 3** — not yet designed:
+  1. In-app session note creation by logged-in players — write a session
+     note through the site itself, which pushes to GitHub (so it lands in
+     the local Obsidian vault on the next pull).
+  2. WhatsApp-only share links for published session notes.
+- **Later / unscoped idea** — an MCP server so players can point Claude (or
+  another MCP-aware AI) at the site to browse content directly, gated
+  behind login once it exists. Raised in passing, not committed to any
+  phase yet.
