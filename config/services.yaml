@@ -7,6 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.vault.excluded_dirs: ['.obsidian', 'docs']
+    app.vault.hidden_dirs: ['A - GM']
 
 services:
     # default configuration for services in *this* file
@@ -18,6 +20,23 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Service\Vault\NoteIndexer:
+        # Public: nothing else in the container references NoteIndexer yet (its
+        # consumers, SyncNotesCommand and WebhookController, land in later tasks),
+        # so Symfony's dead-private-service removal would otherwise delete it and
+        # break KernelTestCase::getContainer()->get(NoteIndexer::class) in tests.
+        public: true
+        arguments:
+            $excludedTopLevelDirs: '%app.vault.excluded_dirs%'
+            $hiddenTopLevelDirs: '%app.vault.hidden_dirs%'
+
+    League\CommonMark\ConverterInterface:
+        class: League\CommonMark\CommonMarkConverter

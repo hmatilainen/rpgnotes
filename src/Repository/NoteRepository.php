@@ -17,4 +17,28 @@ class NoteRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Note::class);
     }
+
+    public function findOneByVaultPath(string $vaultPath): ?Note
+    {
+        return $this->findOneBy(['vaultPath' => $vaultPath]);
+    }
+
+    /**
+     * @param string[] $vaultPaths
+     * @return Note[]
+     */
+    public function findByVaultPathNotIn(array $vaultPaths): array
+    {
+        $qb = $this->createQueryBuilder('n');
+
+        if ($vaultPaths === []) {
+            return $qb->getQuery()->getResult();
+        }
+
+        return $qb
+            ->where($qb->expr()->notIn('n.vaultPath', ':paths'))
+            ->setParameter('paths', $vaultPaths)
+            ->getQuery()
+            ->getResult();
+    }
 }
