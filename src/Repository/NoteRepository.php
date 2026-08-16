@@ -61,14 +61,16 @@ class NoteRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Note[]
+     * Always excludes the single newest report (see findNewestReport()),
+     * regardless of page — the caller renders that one separately as the
+     * front page's featured report.
      */
     public function findReportsPaginated(int $page, int $perPage): array
     {
         return $this->createQueryBuilder('n')
             ->where('n.reportNumber IS NOT NULL')
             ->orderBy('n.reportNumber', 'DESC')
-            ->setFirstResult(($page - 1) * $perPage)
+            ->setFirstResult(($page - 1) * $perPage + 1)
             ->setMaxResults($perPage)
             ->getQuery()
             ->getResult();
@@ -81,5 +83,39 @@ class NoteRepository extends ServiceEntityRepository
             ->where('n.reportNumber IS NOT NULL')
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function findNewestReport(): ?Note
+    {
+        return $this->createQueryBuilder('n')
+            ->where('n.reportNumber IS NOT NULL')
+            ->orderBy('n.reportNumber', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findPreviousReport(int $reportNumber): ?Note
+    {
+        return $this->createQueryBuilder('n')
+            ->where('n.reportNumber IS NOT NULL')
+            ->andWhere('n.reportNumber < :reportNumber')
+            ->setParameter('reportNumber', $reportNumber)
+            ->orderBy('n.reportNumber', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findNextReport(int $reportNumber): ?Note
+    {
+        return $this->createQueryBuilder('n')
+            ->where('n.reportNumber IS NOT NULL')
+            ->andWhere('n.reportNumber > :reportNumber')
+            ->setParameter('reportNumber', $reportNumber)
+            ->orderBy('n.reportNumber', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }
