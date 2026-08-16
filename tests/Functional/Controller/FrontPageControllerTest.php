@@ -10,13 +10,59 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class FrontPageControllerTest extends WebTestCase
 {
-    public function testListsReportsNewestFirstAndExcludesNonReports(): void
+    public function testPage1ShowsFeaturedNewestReportInFullAndExcludesItFromTheListBelow(): void
     {
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
 
-        $older = $this->makeReport($em, 1, 'Reports/1-10/Report-1 x.md', 'report-1');
-        $newer = $this->makeReport($em, 2, 'Reports/1-10/Report-2 y.md', 'report-2');
+        $report1 = $this->makeReport($em, 1, 'report-1', '<p>First session content.</p>');
+        $report2 = $this->makeReport($em, 2, 'report-2', '<p>Second session content.</p>');
+        $report3 = $this->makeReport($em, 3, 'report-3', '<p>Third session content.</p>');
+
+        $client->request('GET', '/');
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+
+        self::assertStringContainsString('Third session content.', $content);
+        self::assertStringNotContainsString('href="/notes/report-3"', $content);
+        self::assertStringContainsString('href="/notes/report-2"', $content);
+        self::assertStringContainsString('href="/notes/report-1"', $content);
+        self::assertTrue(
+            strpos($content, 'href="/notes/report-2"') < strpos($content, 'href="/notes/report-1"')
+        );
+
+        foreach ([$report1, $report2, $report3] as $note) {
+            $em->remove($note);
+        }
+        $em->flush();
+    }
+
+    public function testFeaturedReportLinksToThePreviousSession(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $report1 = $this->makeReport($em, 1, 'report-1', '<p>First.</p>');
+        $report2 = $this->makeReport($em, 2, 'report-2', '<p>Second.</p>');
+
+        $client->request('GET', '/');
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+
+        self::assertStringContainsString('href="/notes/report-1" class="report-nav-prev"', $content);
+
+        foreach ([$report1, $report2] as $note) {
+            $em->remove($note);
+        }
+        $em->flush();
+    }
+
+    public function testExcludesNonReportNotes(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $report = $this->makeReport($em, 1, 'report-1', '<p>content</p>');
         $summary = new Note();
         $summary->setVaultPath('Reports/summary.md');
         $summary->setSlug('reports/summary');
@@ -27,28 +73,23 @@ final class FrontPageControllerTest extends WebTestCase
         $em->flush();
 
         $client->request('GET', '/');
-
         self::assertResponseIsSuccessful();
-        $content = (string) $client->getResponse()->getContent();
-        // Sanity: ensure 'report-2' string exists before the ordering check below.
-        self::assertStringContainsString('report-2', $content);
-        self::assertTrue(strpos($content, 'report-2') < strpos($content, 'report-1'));
-        self::assertStringNotContainsString('Summary', $content);
+        self::assertStringNotContainsString('Summary', (string) $client->getResponse()->getContent());
 
-        foreach ([$older, $newer, $summary] as $note) {
+        foreach ([$report, $summary] as $note) {
             $em->remove($note);
         }
         $em->flush();
     }
 
-    private function makeReport(EntityManagerInterface $em, int $number, string $vaultPath, string $slug): Note
+    private function makeReport(EntityManagerInterface $em, int $number, string $slug, string $html): Note
     {
         $note = new Note();
-        $note->setVaultPath($vaultPath);
+        $note->setVaultPath('Reports/report-' . $number . '.md');
         $note->setSlug($slug);
         $note->setTitle('Report ' . $number);
         $note->setTopLevelFolder('Reports');
-        $note->setHtml('<p>content</p>');
+        $note->setHtml($html);
         $note->setReportNumber($number);
         $em->persist($note);
         $em->flush();

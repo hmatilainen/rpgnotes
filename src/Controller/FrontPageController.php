@@ -25,13 +25,22 @@ final class FrontPageController extends AbstractController
     public function __invoke(Request $request): Response
     {
         $page = max(1, $request->query->getInt('page', 1));
+
+        $featuredReport = $page === 1 ? $this->notes->findNewestReport() : null;
+        $featuredPreviousReport = $featuredReport !== null
+            ? $this->notes->findPreviousReport($featuredReport->getReportNumber())
+            : null;
+
         $reports = $this->notes->findReportsPaginated($page, self::PER_PAGE);
         $total = $this->notes->countReports();
+        $listTotal = max(0, $total - 1);
 
         return $this->render('front_page/index.html.twig', [
+            'featuredReport' => $featuredReport,
+            'featuredPreviousReport' => $featuredPreviousReport,
             'reports' => $reports,
             'page' => $page,
-            'totalPages' => max(1, (int) ceil($total / self::PER_PAGE)),
+            'totalPages' => max(1, (int) ceil($listTotal / self::PER_PAGE)),
             'sidebar' => $this->sidebar->build(),
         ]);
     }

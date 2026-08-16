@@ -3,7 +3,22 @@
 {% block title %}Session Reports — RPG Notes{% endblock %}
 
 {% block body %}
-    <h1>Session Reports</h1>
+    {% if featuredReport %}
+        <article class="featured-report">
+            {% if not (featuredReport.html|trim starts with '<h1') %}
+                <h1>{{ featuredReport.title }}</h1>
+            {% endif %}
+            {{ featuredReport.html|raw }}
+            {% if featuredPreviousReport %}
+                <nav class="report-nav">
+                    <a href="/notes/{{ featuredPreviousReport.slug }}" class="report-nav-prev">← Previous session</a>
+                </nav>
+            {% endif %}
+        </article>
+        <h2 class="older-sessions-heading">Older Sessions</h2>
+    {% else %}
+        <h1>Session Reports</h1>
+    {% endif %}
     <ul class="report-list">
         {% for report in reports %}
             <li>
