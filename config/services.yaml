@@ -40,3 +40,8 @@ services:
 
     League\CommonMark\ConverterInterface:
         class: League\CommonMark\CommonMarkConverter
+
+    App\Service\Vault\GitSyncService:
+        arguments:
+            $vaultPath: '%env(VAULT_PATH)%'
+            $repoUrl: '%env(VAULT_REPO_URL)%'
