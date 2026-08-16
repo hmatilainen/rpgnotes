@@ -45,6 +45,7 @@ class NoteIndexer
         $files = $this->scanner->scan($vaultRoot, $this->excludedTopLevelDirs, $this->hiddenTopLevelDirs);
 
         $drafts = array_map(fn (string $path) => $this->buildDraft($vaultRoot, $path), $files);
+        $this->resolveSlugCollisions($drafts);
         $index = new WikilinkIndex($drafts);
         $currentPaths = [];
 
@@ -74,6 +75,36 @@ class NoteIndexer
         $this->em->flush();
 
         return new IndexResult(updated: \count($drafts), deleted: \count($stale));
+    }
+
+    /**
+     * Disambiguates slugs that collide across drafts. Note.slug has a UNIQUE
+     * database constraint, so two vault files that slugify to the same value
+     * (e.g. filenames differing only in stripped characters) would otherwise
+     * make every subsequent sync fail identically. Drafts are processed in a
+     * deterministic order (sorted by vault path) and any slug already claimed
+     * gets a numeric suffix (-2, -3, ...) appended until it is unique.
+     *
+     * @param NoteDraft[] $drafts
+     */
+    private function resolveSlugCollisions(array $drafts): void
+    {
+        $ordered = $drafts;
+        usort($ordered, static fn (NoteDraft $a, NoteDraft $b) => strcmp($a->vaultPath, $b->vaultPath));
+
+        $usedSlugs = [];
+        foreach ($ordered as $draft) {
+            $baseSlug = $draft->slug;
+            $candidate = $baseSlug;
+            $suffix = 2;
+            while (isset($usedSlugs[$candidate])) {
+                $candidate = sprintf('%s-%d', $baseSlug, $suffix);
+                ++$suffix;
+            }
+
+            $draft->slug = $candidate;
+            $usedSlugs[$candidate] = true;
+        }
     }
 
     private function buildDraft(string $vaultRoot, string $absolutePath): NoteDraft

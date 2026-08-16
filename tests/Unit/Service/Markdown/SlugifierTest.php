@@ -36,4 +36,19 @@ final class SlugifierTest extends TestCase
         self::assertStringNotContainsString('ä', $result);
         self::assertSame('reports/tahan-mennessa-tapahtunutta', $result);
     }
+
+    public function testFallsBackToStableSlugWhenSegmentHasNoSlugifiableCharacters(): void
+    {
+        $result = $this->slugifier->slugifyPath('People/🎲.md');
+
+        self::assertMatchesRegularExpression('#^people/untitled-[0-9a-f]{8}$#', $result);
+    }
+
+    public function testFallbackSlugIsStableForTheSameInput(): void
+    {
+        self::assertSame(
+            $this->slugifier->slugifyPath('People/🎲.md'),
+            $this->slugifier->slugifyPath('People/🎲.md')
+        );
+    }
 }

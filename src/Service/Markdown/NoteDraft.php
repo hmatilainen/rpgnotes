@@ -9,7 +9,7 @@ final class NoteDraft
     public function __construct(
         public readonly string $vaultPath,
         public readonly string $title,
-        public readonly string $slug,
+        public string $slug,
         public readonly string $topLevelFolder,
         public string $strippedContent,
         public readonly ?int $reportNumber,

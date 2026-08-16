@@ -24,7 +24,12 @@ final class Slugifier
         $transliterated = strtr($segment, self::TRANSLITERATION);
         $lowered = mb_strtolower($transliterated);
         $dashed = preg_replace('/[^a-z0-9]+/u', '-', $lowered) ?? $lowered;
+        $trimmed = trim($dashed, '-');
 
-        return trim($dashed, '-');
+        if ($trimmed === '') {
+            return 'untitled-' . substr(sha1($segment), 0, 8);
+        }
+
+        return $trimmed;
     }
 }

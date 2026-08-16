@@ -94,6 +94,47 @@ final class NoteIndexerTest extends KernelTestCase
         self::assertNull($this->notes->findOneByVaultPath('Locations/Deerwater.md'));
     }
 
+    public function testResolvesSlugCollisionsDeterministically(): void
+    {
+        $vault = sys_get_temp_dir() . '/rpgnotes-collision-vault-' . uniqid();
+        mkdir($vault . '/People', 0777, true);
+        // These two filenames differ only in whitespace that the slugifier
+        // collapses, so they would naturally collide on "people/foo-bar".
+        $paths = ['People/Foo  Bar.md', 'People/Foo Bar.md'];
+        sort($paths);
+        foreach ($paths as $path) {
+            file_put_contents($vault . '/' . $path, "# Foo Bar\n");
+        }
+
+        $result = $this->indexer->index($vault);
+
+        self::assertSame(2, $result->updated);
+
+        $first = $this->notes->findOneByVaultPath($paths[0]);
+        $second = $this->notes->findOneByVaultPath($paths[1]);
+
+        self::assertNotNull($first);
+        self::assertNotNull($second);
+        self::assertSame('people/foo-bar', $first->getSlug());
+        self::assertSame('people/foo-bar-2', $second->getSlug());
+    }
+
+    public function testFallsBackToStableSlugForUnslugifiableFilename(): void
+    {
+        $vault = sys_get_temp_dir() . '/rpgnotes-emptyseg-vault-' . uniqid();
+        mkdir($vault . '/People', 0777, true);
+        file_put_contents($vault . '/People/🎲.md', "# Dice\n");
+
+        $result = $this->indexer->index($vault);
+
+        self::assertSame(1, $result->updated);
+
+        $note = $this->notes->findOneByVaultPath('People/🎲.md');
+
+        self::assertNotNull($note);
+        self::assertMatchesRegularExpression('#^people/untitled-[0-9a-f]{8}$#', $note->getSlug());
+    }
+
     protected function tearDown(): void
     {
         $this->em->createQuery('DELETE FROM App\Entity\Note')->execute();
