@@ -1,8 +1,10 @@
 <ul>
     {% for folder in node.folders %}
         <li>
-            <strong>{{ folder.name }}</strong>
-            {% include 'partials/_sidebar.html.twig' with { node: folder } %}
+            <details{% if depth == 0 %} open{% endif %}>
+                <summary>{{ folder.name }}</summary>
+                {% include 'partials/_sidebar.html.twig' with { node: folder, depth: depth + 1 } %}
+            </details>
         </li>
     {% endfor %}
     {% for note in node.notes %}
