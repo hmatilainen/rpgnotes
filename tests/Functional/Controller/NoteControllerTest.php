@@ -10,6 +10,29 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class NoteControllerTest extends WebTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->cleanUpNotes();
+        // cleanUpNotes() boots the kernel to get the entity manager; shut it
+        // down again so the test method's own createClient() call can boot
+        // a fresh kernel (WebTestCase::createClient() refuses to run if the
+        // kernel is already booted).
+        self::ensureKernelShutdown();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->cleanUpNotes();
+        parent::tearDown();
+    }
+
+    private function cleanUpNotes(): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->createQuery('DELETE FROM App\Entity\Note')->execute();
+    }
+
     public function testRendersExistingNoteWithOwnHeading(): void
     {
         $client = static::createClient();
@@ -30,9 +53,6 @@ final class NoteControllerTest extends WebTestCase
         self::assertSelectorCount(1, 'h1');
         self::assertSelectorTextContains('h1', 'Deerwater');
         self::assertStringContainsString('A small settlement.', (string) $client->getResponse()->getContent());
-
-        $em->remove($note);
-        $em->flush();
     }
 
     public function testRendersExistingNoteWithoutOwnHeading(): void
@@ -55,9 +75,6 @@ final class NoteControllerTest extends WebTestCase
         self::assertSelectorCount(1, 'h1');
         self::assertSelectorTextContains('h1', 'Millhaven');
         self::assertStringContainsString('A quiet farming village.', (string) $client->getResponse()->getContent());
-
-        $em->remove($note);
-        $em->flush();
     }
 
     public function testReturns404ForUnknownSlug(): void
@@ -73,9 +90,9 @@ final class NoteControllerTest extends WebTestCase
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
 
-        $report1 = $this->makeReport($em, 1, 'reports/report-1');
-        $report2 = $this->makeReport($em, 2, 'reports/report-2');
-        $report3 = $this->makeReport($em, 3, 'reports/report-3');
+        $this->makeReport($em, 1, 'reports/report-1');
+        $this->makeReport($em, 2, 'reports/report-2');
+        $this->makeReport($em, 3, 'reports/report-3');
 
         $client->request('GET', '/notes/reports/report-2');
 
@@ -83,11 +100,6 @@ final class NoteControllerTest extends WebTestCase
         $content = (string) $client->getResponse()->getContent();
         self::assertStringContainsString('href="/notes/reports/report-1" class="report-nav-prev"', $content);
         self::assertStringContainsString('href="/notes/reports/report-3" class="report-nav-next"', $content);
-
-        foreach ([$report1, $report2, $report3] as $note) {
-            $em->remove($note);
-        }
-        $em->flush();
     }
 
     public function testNewestReportOmitsNextLink(): void
@@ -95,8 +107,8 @@ final class NoteControllerTest extends WebTestCase
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
 
-        $report1 = $this->makeReport($em, 1, 'reports/report-1');
-        $report2 = $this->makeReport($em, 2, 'reports/report-2');
+        $this->makeReport($em, 1, 'reports/report-1');
+        $this->makeReport($em, 2, 'reports/report-2');
 
         $client->request('GET', '/notes/reports/report-2');
 
@@ -104,11 +116,6 @@ final class NoteControllerTest extends WebTestCase
         $content = (string) $client->getResponse()->getContent();
         self::assertStringContainsString('report-nav-prev', $content);
         self::assertStringNotContainsString('report-nav-next', $content);
-
-        foreach ([$report1, $report2] as $note) {
-            $em->remove($note);
-        }
-        $em->flush();
     }
 
     public function testOldestReportOmitsPreviousLink(): void
@@ -116,8 +123,8 @@ final class NoteControllerTest extends WebTestCase
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
 
-        $report1 = $this->makeReport($em, 1, 'reports/report-1');
-        $report2 = $this->makeReport($em, 2, 'reports/report-2');
+        $this->makeReport($em, 1, 'reports/report-1');
+        $this->makeReport($em, 2, 'reports/report-2');
 
         $client->request('GET', '/notes/reports/report-1');
 
@@ -125,11 +132,6 @@ final class NoteControllerTest extends WebTestCase
         $content = (string) $client->getResponse()->getContent();
         self::assertStringNotContainsString('report-nav-prev', $content);
         self::assertStringContainsString('report-nav-next', $content);
-
-        foreach ([$report1, $report2] as $note) {
-            $em->remove($note);
-        }
-        $em->flush();
     }
 
     public function testNonReportNoteShowsNoNavigationLinks(): void
@@ -152,9 +154,6 @@ final class NoteControllerTest extends WebTestCase
         $content = (string) $client->getResponse()->getContent();
         self::assertStringNotContainsString('report-nav-prev', $content);
         self::assertStringNotContainsString('report-nav-next', $content);
-
-        $em->remove($note);
-        $em->flush();
     }
 
     private function makeReport(EntityManagerInterface $em, int $number, string $slug): Note
