@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Service\Vault;
 
+use App\Entity\HiddenPath;
 use App\Repository\NoteRepository;
 use App\Service\Vault\NoteIndexer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,16 +29,28 @@ final class NoteIndexerTest extends KernelTestCase
 
         // Truncate between tests so runs are independent.
         $this->em->createQuery('DELETE FROM App\Entity\Note')->execute();
+        $this->em->createQuery('DELETE FROM App\Entity\HiddenPath')->execute();
+
+        $hiddenPath = new HiddenPath();
+        $hiddenPath->setPath('A - GM');
+        $this->em->persist($hiddenPath);
+        $this->em->flush();
     }
 
-    public function testIndexesVisibleNotesAndExcludesHiddenFolder(): void
+    public function testIndexesAllNotesAndFlagsHiddenOnesInsteadOfExcluding(): void
     {
         $result = $this->indexer->index($this->vaultRoot);
 
-        self::assertSame(4, $result->updated); // Malekith, Deerwater, Report-1, summary
+        self::assertSame(5, $result->updated); // Malekith, Deerwater, Report-1, summary, Secrets
         self::assertSame(0, $result->deleted);
-        self::assertNull($this->notes->findOneByVaultPath('A - GM/Secrets.md'));
-        self::assertNotNull($this->notes->findOneByVaultPath('People/Malekith.md'));
+
+        $hidden = $this->notes->findOneByVaultPath('A - GM/Secrets.md');
+        self::assertNotNull($hidden);
+        self::assertTrue($hidden->isHidden());
+
+        $visible = $this->notes->findOneByVaultPath('People/Malekith.md');
+        self::assertNotNull($visible);
+        self::assertFalse($visible->isHidden());
     }
 
     public function testStripsFrontmatterCalloutsAndImagePlaceholders(): void
@@ -163,6 +176,7 @@ final class NoteIndexerTest extends KernelTestCase
     protected function tearDown(): void
     {
         $this->em->createQuery('DELETE FROM App\Entity\Note')->execute();
+        $this->em->createQuery('DELETE FROM App\Entity\HiddenPath')->execute();
         parent::tearDown();
     }
 }

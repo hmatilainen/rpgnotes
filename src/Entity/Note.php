@@ -40,6 +40,9 @@ class Note
     #[ORM\Column]
     private \DateTimeImmutable $updatedAt;
 
+    #[ORM\Column]
+    private bool $hidden = false;
+
     public function __construct()
     {
         $this->updatedAt = new \DateTimeImmutable();
@@ -128,5 +131,15 @@ class Note
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    public function isHidden(): bool
+    {
+        return $this->hidden;
+    }
+
+    public function setHidden(bool $hidden): void
+    {
+        $this->hidden = $hidden;
     }
 }

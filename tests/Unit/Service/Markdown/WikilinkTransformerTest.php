@@ -28,6 +28,7 @@ final class WikilinkTransformerTest extends TestCase
             strippedContent: '',
             reportNumber: null,
             sessionDate: null,
+            hidden: false,
         );
     }
 

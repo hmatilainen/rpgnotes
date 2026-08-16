@@ -14,6 +14,7 @@ final class NoteDraft
         public string $strippedContent,
         public readonly ?int $reportNumber,
         public readonly ?\DateTimeImmutable $sessionDate,
+        public readonly bool $hidden,
     ) {
     }
 }

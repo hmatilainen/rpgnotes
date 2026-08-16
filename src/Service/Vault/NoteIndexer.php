@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Vault;
 
 use App\Entity\Note;
+use App\Repository\HiddenPathRepository;
 use App\Repository\NoteRepository;
 use App\Service\Markdown\CalloutStripper;
 use App\Service\Markdown\FrontmatterStripper;
@@ -21,7 +22,6 @@ class NoteIndexer
 {
     /**
      * @param string[] $excludedTopLevelDirs
-     * @param string[] $hiddenTopLevelDirs
      */
     public function __construct(
         private readonly VaultFileScanner $scanner,
@@ -33,20 +33,28 @@ class NoteIndexer
         private readonly ReportFilenameParser $reportParser,
         private readonly ConverterInterface $markdownConverter,
         private readonly NoteRepository $notes,
+        private readonly HiddenPathRepository $hiddenPaths,
+        private readonly HiddenPathMatcher $hiddenPathMatcher,
         private readonly EntityManagerInterface $em,
         private readonly array $excludedTopLevelDirs,
-        private readonly array $hiddenTopLevelDirs,
     ) {
     }
 
     public function index(string $vaultRoot): IndexResult
     {
         $vaultRoot = rtrim($vaultRoot, '/');
-        $files = $this->scanner->scan($vaultRoot, $this->excludedTopLevelDirs, $this->hiddenTopLevelDirs);
+        $files = $this->scanner->scan($vaultRoot, $this->excludedTopLevelDirs);
+        $hiddenPaths = $this->hiddenPaths->findAllPaths();
 
-        $drafts = array_map(fn (string $path) => $this->buildDraft($vaultRoot, $path), $files);
+        $drafts = array_map(fn (string $path) => $this->buildDraft($vaultRoot, $path, $hiddenPaths), $files);
         $this->resolveSlugCollisions($drafts);
-        $index = new WikilinkIndex($drafts);
+
+        // Hidden notes ARE indexed (so an admin can browse them) but are
+        // never added to the WikilinkIndex, so a wikilink pointing at one
+        // renders as plain text for every viewer, admin included — see the
+        // spec's "Admin link resolution" decision.
+        $visibleDrafts = array_values(array_filter($drafts, static fn (NoteDraft $draft) => !$draft->hidden));
+        $index = new WikilinkIndex($visibleDrafts);
         $currentPaths = [];
 
         foreach ($drafts as $draft) {
@@ -61,6 +69,7 @@ class NoteIndexer
             $note->setHtml($html);
             $note->setReportNumber($draft->reportNumber);
             $note->setSessionDate($draft->sessionDate);
+            $note->setHidden($draft->hidden);
             $note->setUpdatedAt(new \DateTimeImmutable());
 
             $this->em->persist($note);
@@ -107,7 +116,10 @@ class NoteIndexer
         }
     }
 
-    private function buildDraft(string $vaultRoot, string $absolutePath): NoteDraft
+    /**
+     * @param string[] $hiddenPaths
+     */
+    private function buildDraft(string $vaultRoot, string $absolutePath, array $hiddenPaths): NoteDraft
     {
         $vaultPath = ltrim(str_replace($vaultRoot, '', $absolutePath), '/');
         $filename = basename($vaultPath);
@@ -135,6 +147,7 @@ class NoteIndexer
             strippedContent: $stripped,
             reportNumber: $reportMeta?->reportNumber,
             sessionDate: $reportMeta?->sessionDate,
+            hidden: $this->hiddenPathMatcher->isHidden($vaultPath, $hiddenPaths),
         );
     }
 }

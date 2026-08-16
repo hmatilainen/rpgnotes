@@ -8,13 +8,12 @@ final class VaultFileScanner
 {
     /**
      * @param string[] $excludedTopLevelDirs
-     * @param string[] $hiddenTopLevelDirs
      * @return string[] absolute file paths of .md files to index, sorted
      */
-    public function scan(string $vaultRoot, array $excludedTopLevelDirs, array $hiddenTopLevelDirs): array
+    public function scan(string $vaultRoot, array $excludedTopLevelDirs): array
     {
         $vaultRoot = rtrim($vaultRoot, '/');
-        $skip = array_map('mb_strtolower', array_merge($excludedTopLevelDirs, $hiddenTopLevelDirs));
+        $skip = array_map('mb_strtolower', $excludedTopLevelDirs);
 
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($vaultRoot, \FilesystemIterator::SKIP_DOTS)

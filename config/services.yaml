@@ -8,7 +8,6 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.vault.excluded_dirs: ['.obsidian', 'docs']
-    app.vault.hidden_dirs: ['A - GM', 'Home.md']
 
 services:
     # default configuration for services in *this* file
@@ -31,7 +30,6 @@ services:
     App\Service\Vault\NoteIndexer:
         arguments:
             $excludedTopLevelDirs: '%app.vault.excluded_dirs%'
-            $hiddenTopLevelDirs: '%app.vault.hidden_dirs%'
 
     League\CommonMark\ConverterInterface:
         class: League\CommonMark\CommonMarkConverter
