@@ -64,12 +64,15 @@ class NoteRepository extends ServiceEntityRepository
      * Always excludes the single newest report (see findNewestReport()),
      * regardless of page — the caller renders that one separately as the
      * front page's featured report.
+     *
+     * @return Note[]
      */
     public function findReportsPaginated(int $page, int $perPage): array
     {
         return $this->createQueryBuilder('n')
             ->where('n.reportNumber IS NOT NULL')
             ->orderBy('n.reportNumber', 'DESC')
+            ->addOrderBy('n.id', 'DESC')
             ->setFirstResult(($page - 1) * $perPage + 1)
             ->setMaxResults($perPage)
             ->getQuery()
@@ -90,6 +93,7 @@ class NoteRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('n')
             ->where('n.reportNumber IS NOT NULL')
             ->orderBy('n.reportNumber', 'DESC')
+            ->addOrderBy('n.id', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -102,6 +106,7 @@ class NoteRepository extends ServiceEntityRepository
             ->andWhere('n.reportNumber < :reportNumber')
             ->setParameter('reportNumber', $reportNumber)
             ->orderBy('n.reportNumber', 'DESC')
+            ->addOrderBy('n.id', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -114,6 +119,7 @@ class NoteRepository extends ServiceEntityRepository
             ->andWhere('n.reportNumber > :reportNumber')
             ->setParameter('reportNumber', $reportNumber)
             ->orderBy('n.reportNumber', 'ASC')
+            ->addOrderBy('n.id', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
