@@ -103,6 +103,34 @@ final class PlayerControllerTest extends WebTestCase
         self::assertNotSame($firstToken, $player->getInviteToken());
     }
 
+    public function testInvitedButUnregisteredPlayerShowsRegenerateLabel(): void
+    {
+        $client = static::createClient();
+        $admin = $this->createUser('admin3', 'ROLE_ADMIN');
+        $client->loginUser($admin);
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $player = new User();
+        $player->setLabel('Mikko');
+        $player->setRole('ROLE_PLAYER');
+        $em->persist($player);
+        $em->flush();
+
+        // Generate an invite; the player still has no username (not yet registered).
+        $client->request('GET', '/admin/players');
+        $crawler = $client->getCrawler();
+        $form = $crawler->filter('form[action$="/' . $player->getId() . '/invite"]')->form();
+        $client->submit($form);
+
+        self::assertNull($player->getUsername());
+
+        $client->request('GET', '/admin/players');
+        $crawler = $client->getCrawler();
+        $button = $crawler->filter('form[action$="/' . $player->getId() . '/invite"] button');
+
+        self::assertSame('Regenerate invite', trim($button->text()));
+    }
+
     private function createUser(string $username, string $role): User
     {
         $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);

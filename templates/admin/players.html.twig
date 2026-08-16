@@ -36,7 +36,7 @@
                     <td>
                         <form method="post" action="{{ path('admin_players_invite', {id: player.id}) }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('admin_players_invite') }}">
-                            <button type="submit">{{ player.username ? 'Regenerate invite' : 'Generate invite link' }}</button>
+                            <button type="submit">{{ player.inviteToken and player.isInviteValid ? 'Regenerate invite' : 'Generate invite link' }}</button>
                         </form>
                     </td>
                 </tr>
