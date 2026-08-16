@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}RPG Notes{% endblock %}</title>
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
+    <header class="navbar">
+        <a href="/">RPG Notes — Forgotten Realms</a>
+    </header>
     <div class="layout">
         <nav class="sidebar">
-            {% include 'partials/_sidebar.html.twig' with { node: sidebar } %}
+            {% include 'partials/_sidebar.html.twig' with { node: sidebar, depth: 0 } %}
         </nav>
         <main class="content">
             {% block body %}{% endblock %}
