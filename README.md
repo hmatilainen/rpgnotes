@@ -7,6 +7,27 @@ via a collapsible sidebar, and Obsidian wikilinks resolve into working
 links. Admin accounts and invite-only player registration gate a small set
 of hidden GM-only folders/files.
 
+## How it works
+
+1. **Publish your Obsidian vault to GitHub** — use a Git plugin in Obsidian
+   to pull, commit, and push notes to a repository. Create a personal
+   access token (PAT) with read/write access to that repo, and add a small
+   GitHub Action (see [Auto-sync on vault push](#auto-sync-on-vault-push-github-actions))
+   that calls the RPG Notes webhook after every push.
+2. **Install this app on a server** — Docker on a VPS is enough; Apache or
+   another reverse proxy terminates TLS and proxies to the app container.
+3. **Point the app at your vault repo** — in `.env.local`, set
+   `VAULT_REPO_URL` (with your PAT) and `SYNC_WEBHOOK_SECRET` (shared with
+   the GitHub Action).
+
+**Day to day (GM in Obsidian):** edit notes → commit → push → GitHub →
+Action hits `/webhook/sync` → the server pulls and reindexes. Your players
+see the updates on the site.
+
+**Session reports (players on the site):** an invited player writes a
+report in the browser; the app commits it to the vault repo on GitHub. Your
+next Git pull in Obsidian brings that report back into your local vault.
+
 ## Stack
 
 Symfony 7.4 (PHP 8.3) on FrankenPHP, PostgreSQL 16, all via docker-compose.
