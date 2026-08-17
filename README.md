@@ -71,19 +71,55 @@ read.
 
 ## Syncing notes
 
-Notes sync from GitHub either via a manual command or a webhook a GitHub
-Action can call after every push:
+Notes sync from GitHub in two ways: run a command yourself, or let a GitHub
+Action on your **vault** repo call the site webhook after every push.
+
+### Manual sync
 
 ```bash
 docker compose exec app bin/console app:sync
 ```
 
-`POST /webhook/sync` with header `Authorization: Bearer <SYNC_WEBHOOK_SECRET>`
-does the same thing over HTTP, for wiring up a GitHub Action.
+### Auto-sync on vault push (GitHub Actions)
 
-Every sync is a **full reindex** — it clones/pulls the repo, walks every
-`.md` file, and re-renders each note. Folders/files marked hidden (see
-below) still get indexed, just flagged so only admins can see them.
+This is the usual setup: Obsidian → Git push to your vault repo → GitHub
+Action → `POST /webhook/sync` on the RPG Notes server → site reindexes.
+
+**On the RPG Notes server** (once):
+
+1. Set `SYNC_WEBHOOK_SECRET` in `.env.local` to a long random string (see
+   vault config section above). Restart the `app` container after editing.
+2. Your public site must be reachable at `https://your-domain/webhook/sync`
+   (Apache proxies to the Docker app).
+
+**In your Obsidian vault GitHub repo** (not this `rpgnotes` app repo):
+
+1. Copy `docs/vault-github-action-sync.yml` from this project to your vault
+   repo as `.github/workflows/sync-rpgnotes.yml` and commit to `master` or
+   `main`.
+2. Open the vault repo on GitHub → **Settings** → **Secrets and variables** →
+   **Actions** → **New repository secret**:
+   | Secret name | Value |
+   |-------------|--------|
+   | `RPGNOTES_SYNC_URL` | `https://your-domain/webhook/sync` |
+   | `RPGNOTES_SYNC_SECRET` | **exact same string** as `SYNC_WEBHOOK_SECRET` on the server |
+3. Push any change to `master`/`main` on the vault repo. Under **Actions** you
+   should see “Sync RPG Notes site” run and complete green.
+4. Optional smoke test without a vault push:
+   ```bash
+   curl -fsS -X POST "https://your-domain/webhook/sync" \
+     -H "Authorization: Bearer YOUR_SYNC_WEBHOOK_SECRET"
+   ```
+   A JSON body like `{"updated":525,"deleted":0}` means success.
+
+The webhook runs `git pull` on the server vault clone and a full reindex —
+the same work as `bin/console app:sync`. Player-published session reports
+that push to the vault repo will also trigger this, so the site updates
+after publish.
+
+Every sync walks every `.md` file and re-renders each note. Folders/files
+marked hidden (see below) still get indexed, just flagged so only admins can
+see them.
 
 ## Admin & players
 
@@ -181,23 +217,14 @@ container on `127.0.0.1:8091`.
    sudo systemctl reload apache2
    ```
 
-### Vault webhook (Obsidian → GitHub → site)
-
-Add `docs/vault-github-action-sync.yml` to your **vault** repo as
-`.github/workflows/sync-rpgnotes.yml`. Set GitHub Actions secrets:
-
-| Secret | Value |
-|--------|--------|
-| `RPGNOTES_SYNC_URL` | `https://notes.example.com/webhook/sync` |
-| `RPGNOTES_SYNC_SECRET` | same as `SYNC_WEBHOOK_SECRET` on the server |
-
-Every push to the vault repo triggers a pull + reindex on the server.
-
 ### Redeploy after code changes
 
 ```bash
 ./scripts/deploy.sh
 ```
+
+The vault auto-sync workflow lives in your **Obsidian vault repo** — see
+[Auto-sync on vault push](#auto-sync-on-vault-push-github-actions) above.
 
 ## Roadmap
 
