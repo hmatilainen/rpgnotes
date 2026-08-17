@@ -2,7 +2,7 @@
 #   .github/workflows/sync-rpgnotes.yml
 #
 # GitHub repo → Settings → Secrets → Actions:
-#   RPGNOTES_SYNC_URL     = https://rpg.kuura.art/webhook/sync
+#   RPGNOTES_SYNC_URL     = https://notes.example.com/webhook/sync
 #   RPGNOTES_SYNC_SECRET  = same value as SYNC_WEBHOOK_SECRET on the server
 
 name: Sync RPG Notes site

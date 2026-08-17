@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
-# Deploy RPG Notes to home_hetzner (/opt/rpgnotes).
+# Deploy RPG Notes to a remote server (/opt/rpgnotes by default).
+# Copy scripts/deploy.local.example to scripts/deploy.local for your SSH host and URL.
 set -euo pipefail
 
-REMOTE="${REMOTE:-home_hetzner}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+if [[ -f "${SCRIPT_DIR}/deploy.local" ]]; then
+  # shellcheck source=/dev/null
+  source "${SCRIPT_DIR}/deploy.local"
+fi
+
+REMOTE="${REMOTE:-your-server}"
 DEST="${DEST:-/opt/rpgnotes}"
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+DEFAULT_URI="${DEFAULT_URI:-https://notes.example.com}"
 
 echo "→ Syncing files to ${REMOTE}:${DEST}"
 ssh "${REMOTE}" "mkdir -p ${DEST}"
@@ -28,7 +37,7 @@ ssh "${REMOTE}" "cd ${DEST} && touch .env.local && if ! grep -q '^POSTGRES_PASSW
   SECRET=\$(openssl rand -hex 32)
   cat >> .env.local <<EOF
 APP_SECRET=\${SECRET}
-DEFAULT_URI=https://rpg.kuura.art
+DEFAULT_URI=${DEFAULT_URI}
 POSTGRES_PASSWORD=\${PW}
 DATABASE_URL=postgresql://app:\${PW}@db:5432/app?serverVersion=16&charset=utf8
 EOF

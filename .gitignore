@@ -1,5 +1,7 @@
 /.worktrees/
 /.superpowers/
+/docs/superpowers/
+/scripts/deploy.local
 
 ###> symfony/framework-bundle ###
 /.env.local

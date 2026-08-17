@@ -157,11 +157,12 @@ container on `127.0.0.1:8091`.
    fill in `APP_SECRET`, `VAULT_REPO_URL`, `SYNC_WEBHOOK_SECRET`,
    `POSTGRES_PASSWORD`, and `DATABASE_URL` (see vault section above).
    Set `DEFAULT_URI=https://notes.example.com`.
-3. **Deploy** from your machine (configure `REMOTE` / `DEST` for your SSH host
-   and install path):
+3. **Deploy** — copy `scripts/deploy.local.example` to `scripts/deploy.local` (gitignored)
+   with your SSH host and public URL, then deploy:
    ```bash
-   REMOTE=your-server ./scripts/deploy-home-hetzner.sh
+   ./scripts/deploy.sh
    ```
+   You can still override per run: `REMOTE=your-server ./scripts/deploy.sh`.
    By default the deploy script keeps the server's existing `.env.local`; set
    `UPLOAD_ENV_LOCAL=1` only if you intend to overwrite it from your laptop.
 4. **Create admin** (once):
@@ -195,7 +196,7 @@ Every push to the vault repo triggers a pull + reindex on the server.
 ### Redeploy after code changes
 
 ```bash
-REMOTE=your-server ./scripts/deploy-home-hetzner.sh
+./scripts/deploy.sh
 ```
 
 ## Roadmap
@@ -206,9 +207,4 @@ REMOTE=your-server ./scripts/deploy-home-hetzner.sh
 - **Phase 3** — player session report publishing with GitHub push-back, share
   tokens, and manual WhatsApp share buttons. ✅ Done.
 - **Phase 4** — MCP server + logged-in “AI access” page (copy-paste connector
-  setup for Claude, ChatGPT, Mistral, Cursor). Spec:
-  `docs/superpowers/specs/2026-08-16-phase4-mcp-ai-access-design.md`
-- **Later / unscoped idea** — an MCP server so players can point Claude (or
-  another MCP-aware AI) at the site to browse content directly, gated
-  behind login once it exists. Raised in passing, not committed to any
-  phase yet.
+  setup for Claude, ChatGPT, Mistral, Cursor). ✅ Done.

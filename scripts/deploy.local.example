@@ -1,0 +1,4 @@
+# Copy to scripts/deploy.local (gitignored) and set your production target.
+REMOTE=your-server
+DEFAULT_URI=https://notes.example.com
+# DEST=/opt/rpgnotes

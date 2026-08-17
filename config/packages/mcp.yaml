@@ -1,8 +1,8 @@
 mcp:
     app: 'Forgotten Realms Notes'
     version: '1.0.0'
-    description: 'Session reports and campaign lore from rpg.kuura.art'
-    website_url: 'https://rpg.kuura.art'
+    description: 'Session reports and campaign lore'
+    website_url: '%env(DEFAULT_URI)%'
     instructions: |
         Forgotten Realms D&D campaign notes. Session reports are mostly in Finnish under Reports/.
         Use list_session_reports and get_session_report for session history.
