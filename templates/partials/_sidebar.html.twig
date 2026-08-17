@@ -12,13 +12,18 @@
                         <span>{{ folder.name }}</span>
                     </span>
                 </summary>
-                {% include 'partials/_sidebar.html.twig' with { node: folder, depth: depth + 1, path: folderPath } %}
+                {% include 'partials/_sidebar.html.twig' with {
+                    node: folder,
+                    depth: depth + 1,
+                    path: folderPath,
+                    activeNoteSlug: activeNoteSlug ?? null,
+                } %}
             </details>
         </li>
     {% endfor %}
     {% for note in node.notes %}
         <li class="sidebar-note">
-            <a href="/notes/{{ note.slug }}">
+            <a href="/notes/{{ note.slug }}"{% if activeNoteSlug is defined and activeNoteSlug == note.slug %} class="is-active"{% endif %}>
                 {% include 'partials/_icon.html.twig' with { name: 'file-text', class: 'icon icon--sm' } only %}
                 <span>{{ note.title }}</span>
             </a>

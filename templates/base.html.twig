@@ -44,7 +44,12 @@
     </header>
     <div class="layout">
         <nav class="sidebar">
-            {% include 'partials/_sidebar.html.twig' with { node: sidebar, depth: 0, path: '' } %}
+            {% include 'partials/_sidebar.html.twig' with {
+                node: sidebar,
+                depth: 0,
+                path: '',
+                activeNoteSlug: app.request.attributes.get('_route') == 'note_show' ? app.request.attributes.get('slug') : null,
+            } %}
         </nav>
         <main class="content">
             {% block body %}{% endblock %}

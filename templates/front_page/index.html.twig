@@ -4,9 +4,10 @@
 
 {% block body %}
     {% if featuredReport %}
-        <article class="featured-report">
+        <article class="featured-report featured-report-hero">
+            {% include 'partials/_report_meta.html.twig' with { note: featuredReport } only %}
             {% if not (featuredReport.html|trim starts with '<h1') %}
-                <h1>{{ featuredReport.title }}</h1>
+                <h1 class="featured-report-title">{{ featuredReport.title }}</h1>
             {% endif %}
             {{ featuredReport.html|raw }}
             <p class="report-actions">
@@ -32,7 +33,12 @@
         {% for report in reports %}
             <li>
                 <span class="report-list-main">
-                    <a href="/notes/{{ report.slug }}">{{ report.title }}</a>
+                    <a href="/notes/{{ report.slug }}" class="report-list-link">
+                        {% if report.reportNumber %}
+                            <span class="report-number-chip">#{{ report.reportNumber }}</span>
+                        {% endif %}
+                        <span>{{ report.title }}</span>
+                    </a>
                     {% if report.sessionDate %}
                         <span class="report-date">{{ report.sessionDate|date('d.m.Y') }}</span>
                     {% endif %}

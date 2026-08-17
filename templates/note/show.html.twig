@@ -32,15 +32,7 @@
     {% endfor %}
 
     {% if note.reportNumber is not null %}
-        <p class="report-meta">
-            Report {{ note.reportNumber }}
-            {% if note.sessionDate %}
-                · In-game {{ note.sessionDate|date('j.n.Y') }}
-            {% endif %}
-            {% if note.publishedAt %}
-                · Published {{ note.publishedAt|date('j M Y') }}
-            {% endif %}
-        </p>
+        {% include 'partials/_report_meta.html.twig' with { note: note } only %}
     {% endif %}
     <article>
         {% if not (note.html|trim starts with '<h1') %}

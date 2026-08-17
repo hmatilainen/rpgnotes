@@ -1,0 +1,20 @@
+{% if note.reportNumber is not null %}
+    <p class="report-meta report-meta-row">
+        <span class="report-meta-item">
+            {% include 'partials/_icon.html.twig' with { name: 'hash', class: 'icon icon--sm' } only %}
+            <span>Report {{ note.reportNumber }}</span>
+        </span>
+        {% if note.sessionDate %}
+            <span class="report-meta-item">
+                {% include 'partials/_icon.html.twig' with { name: 'calendar', class: 'icon icon--sm' } only %}
+                <span>In-game {{ note.sessionDate|date('j.n.Y') }}</span>
+            </span>
+        {% endif %}
+        {% if note.publishedAt %}
+            <span class="report-meta-item">
+                {% include 'partials/_icon.html.twig' with { name: 'clock', class: 'icon icon--sm' } only %}
+                <span>Published {{ note.publishedAt|date('j M Y') }}</span>
+            </span>
+        {% endif %}
+    </p>
+{% endif %}
