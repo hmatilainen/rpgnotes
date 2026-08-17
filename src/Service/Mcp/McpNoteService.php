@@ -10,6 +10,7 @@ use App\Repository\NoteRepository;
 use App\Repository\ShareTokenRepository;
 use App\Service\Sidebar\SidebarBuilder;
 use App\Service\Sidebar\SidebarNode;
+use App\Service\Vault\ReportsFolder;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class McpNoteService
@@ -19,6 +20,7 @@ final class McpNoteService
         private readonly ShareTokenRepository $shareTokens,
         private readonly SidebarBuilder $sidebar,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly ReportsFolder $reportsFolder,
     ) {
     }
 
@@ -35,7 +37,10 @@ final class McpNoteService
             'site_url' => $this->absoluteUrl('front_page'),
             'folders' => $folders,
             'newest_report' => $newest !== null ? $this->summarizeReport($newest) : null,
-            'hint' => 'Session reports live under Reports/. Reference notes use folders like People/, Locations/. Wikilinks use [[Folder/Name]] syntax.',
+            'hint' => sprintf(
+                'Session reports live under %s/. Reference notes use folders like People/, Locations/. Wikilinks use [[Folder/Name]] syntax.',
+                $this->reportsFolder->name,
+            ),
         ];
     }
 

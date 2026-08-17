@@ -10,13 +10,14 @@ final class ReportNumberAllocator
 {
     public function __construct(
         private readonly ReportFilenameParser $reportParser,
+        private readonly ReportsFolder $reportsFolder,
     ) {
     }
 
     public function allocateNext(string $vaultRoot): int
     {
         $vaultRoot = rtrim($vaultRoot, '/');
-        $reportsDir = $vaultRoot . '/Reports';
+        $reportsDir = $vaultRoot . '/' . $this->reportsFolder->name;
 
         if (!is_dir($reportsDir)) {
             return 1;

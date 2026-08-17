@@ -4,7 +4,7 @@ mcp:
     description: 'Session reports and campaign lore'
     website_url: '%env(DEFAULT_URI)%'
     instructions: |
-        Forgotten Realms D&D campaign notes. Session reports are mostly in Finnish under Reports/.
+        Forgotten Realms D&D campaign notes. Session reports use the REPORTS_FOLDER from your vault layout.
         Use list_session_reports and get_session_report for session history.
         Lore and NPCs live in folders like People/, Locations/. Wikilinks use [[Folder/Name]] syntax.
     client_transports:

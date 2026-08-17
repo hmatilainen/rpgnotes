@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Note;
+use App\Service\Vault\ReportsFolder;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,8 +15,10 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class NoteRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        private readonly ReportsFolder $reportsFolder,
+    ) {
         parent::__construct($registry, Note::class);
     }
 
@@ -55,7 +58,7 @@ class NoteRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('n')
             ->where('n.topLevelFolder != :reports')
-            ->setParameter('reports', 'Reports')
+            ->setParameter('reports', $this->reportsFolder->name)
             ->orderBy('n.vaultPath', 'ASC');
 
         if (!$includeHidden) {

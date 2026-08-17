@@ -31,6 +31,26 @@ services:
         arguments:
             $excludedTopLevelDirs: '%app.vault.excluded_dirs%'
 
+    App\Service\Vault\ReportsFolder:
+        arguments:
+            $name: '%env(REPORTS_FOLDER)%'
+
+    App\Repository\NoteRepository:
+        arguments:
+            $reportsFolder: '@App\Service\Vault\ReportsFolder'
+
+    App\Service\Vault\ReportFileBuilder:
+        arguments:
+            $reportsFolder: '@App\Service\Vault\ReportsFolder'
+
+    App\Service\Vault\ReportNumberAllocator:
+        arguments:
+            $reportsFolder: '@App\Service\Vault\ReportsFolder'
+
+    App\Service\Mcp\McpNoteService:
+        arguments:
+            $reportsFolder: '@App\Service\Vault\ReportsFolder'
+
     League\CommonMark\ConverterInterface:
         class: League\CommonMark\CommonMarkConverter
         arguments:

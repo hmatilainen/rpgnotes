@@ -8,6 +8,11 @@ use Symfony\Component\Yaml\Yaml;
 
 final class ReportFileBuilder
 {
+    public function __construct(
+        private readonly ReportsFolder $reportsFolder,
+    ) {
+    }
+
     public function buildVaultPath(
         int $reportNumber,
         \DateTimeImmutable $sessionDate,
@@ -17,7 +22,7 @@ final class ReportFileBuilder
         $datePart = $sessionDate->format('j.n.Y');
         $safeTitle = $this->sanitizeTitle($title);
 
-        return sprintf('Reports/%s/Report-%d %s %s.md', $range, $reportNumber, $datePart, $safeTitle);
+        return sprintf('%s/%s/Report-%d %s %s.md', $this->reportsFolder->name, $range, $reportNumber, $datePart, $safeTitle);
     }
 
     public function buildContent(

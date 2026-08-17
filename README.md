@@ -28,19 +28,27 @@ see the updates on the site.
 report in the browser; the app commits it to the vault repo on GitHub. Your
 next Git pull in Obsidian brings that report back into your local vault.
 
-## Session reports (`Reports/` folder)
+## Session reports (`REPORTS_FOLDER`)
 
 Session reports are **not** mixed into the sidebar tree. They live under a
-top-level `Reports/` folder in your vault, appear on the site home page
-(newest first), and are recognized by a strict filename pattern. The folder
-name and layout are **fixed in code today** — there is no `.env` setting to
-rename `Reports` or change the pattern (only `VAULT_PATH` and `VAULT_REPO_URL`
-point the app at your repo).
+configurable top-level folder in your vault (default `Reports`), appear on
+the site home page (newest first), and are recognized by a strict filename
+pattern.
 
-### Vault layout
+Set the folder name in `.env` or `.env.local`:
+
+```bash
+REPORTS_FOLDER=Reports
+```
+
+Use a single top-level folder name — no slashes. Player publishing, report
+number allocation, and sidebar exclusion all use this setting. The
+`Report-{number} …` filename pattern is still required.
+
+### Vault layout (default `REPORTS_FOLDER=Reports`)
 
 ```
-Reports/
+Reports/                   # or your REPORTS_FOLDER value
   1-10/
     Report-1 20.2.1367 Short session title.md
     Report-2 16.8.1367 Another title.md
@@ -69,7 +77,7 @@ Example path:
 When a player publishes from `/reports/new`, the app:
 
 1. Allocates the next report number by scanning existing `Report-*.md` files
-   under `Reports/`.
+   under your `REPORTS_FOLDER`.
 2. Writes the file under the correct range folder with the filename above.
 3. Adds YAML frontmatter (`published_at`, `author`) and a `## Title` heading
    in the body.
@@ -134,6 +142,9 @@ VAULT_REPO_URL=https://<your-github-username>:<PAT>@github.com/<owner>/<repo>.gi
 # when calling the sync webhook. Pick your own value — don't use the
 # committed dev default.
 SYNC_WEBHOOK_SECRET=<pick-a-real-secret>
+
+# Top-level vault folder for session reports (default Reports).
+REPORTS_FOLDER=Reports
 ```
 
 `docker-compose.yml` deliberately does **not** set `VAULT_REPO_URL` or
@@ -303,13 +314,3 @@ container on `127.0.0.1:8091`.
 
 The vault auto-sync workflow lives in your **Obsidian vault repo** — see
 [Auto-sync on vault push](#auto-sync-on-vault-push-github-actions) above.
-
-## Roadmap
-
-- **Phase 1** — docker foundation, GitHub-synced read-only rendering site. ✅ Done.
-- **Phase 2** — admin account, invite-only player registration, admin-only
-  hidden content. ✅ Done.
-- **Phase 3** — player session report publishing with GitHub push-back, share
-  tokens, and manual WhatsApp share buttons. ✅ Done.
-- **Phase 4** — MCP server + logged-in “AI access” page (copy-paste connector
-  setup for Claude, ChatGPT, Mistral, Cursor). ✅ Done.
