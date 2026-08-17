@@ -1,6 +1,8 @@
 # RPG Notes
 
-A self-hosted site that publishes an Obsidian vault of RPG campaign notes.
+A self-hosted site that publishes an Obsidian vault of RPG campaign notes,
+with an MCP server so you and your players can search and summarize the vault
+from Claude, ChatGPT, Cursor, and other AI tools.
 Session reports show up on the front page newest-first, other notes are 
 browsaeble via a collapsible sidebar, and Obsidian wikilinks resolve into 
 working links. Admin accounts and invite-only player registration gate a 
@@ -36,6 +38,70 @@ see the updates on the site.
 **Session reports (players on the site):** an invited player writes a
 report in the browser; the app commits it to the vault repo on GitHub. Your
 next Git pull in Obsidian brings that report back into your local vault.
+
+## MCP & AI access
+
+This was the main reason I built RPG Notes. The site is nice for reading,
+but the real payoff is hooking your campaign vault into whatever AI assistant
+you already use — Claude, ChatGPT, Mistral Le Chat, Cursor, etc. — so you and
+your players can **search, summarize, and cross-reference** hundreds of lore
+notes without manually scrolling the sidebar or copy-pasting markdown.
+
+Typical uses:
+
+- **“What happened in report 90?”** — pull the full session text into a chat.
+- **“Summarize the last three sessions.”** — quick recap before the next game.
+- **“What do we know about Deerwater?”** — full-text search across titles and
+  bodies, then read the matching lore notes.
+- **“Who mentioned the Blackwood family?”** — find forgotten plot threads from
+  months ago.
+- **Session prep** — combine MCP results with your existing chat history (the
+  plans, theories, and character arcs you already hashed out with an AI) so the
+  assistant has both the canonical notes and your side conversations.
+
+The app exposes an **MCP** (Model Context Protocol) server over HTTP at
+`/mcp`. Logged-in players and admins get a setup page at **`/ai-access`** that
+shows the connector URL and lets you generate a personal **API token** (not
+your site password). Paste those into your AI app's connector settings; the
+token is sent as `Authorization: Bearer <token>` on every MCP request.
+
+Hidden GM-only folders/files (see [Hide a folder or file](#hide-a-folder-or-file))
+are enforced for MCP the same way as on the website — players cannot read or
+search hidden content; admins see everything.
+
+### MCP tools
+
+| Tool | What it does |
+|------|----------------|
+| `get_site_overview` | Campaign layout: top folders, newest session report summary, how notes are organized. |
+| `list_session_reports` | Session reports newest-first (paginated metadata, no full bodies). |
+| `get_session_report` | Full report markdown by report number or slug. |
+| `get_note` | Read any lore/reference note by slug or vault path (e.g. `Locations/Deerwater`). |
+| `search_notes` | Full-text search across titles and bodies; optional folder filter (e.g. `People`). |
+| `browse_vault` | Folder tree like the site sidebar; optional path to zoom into a folder. |
+
+### Connecting an AI client
+
+1. Log in on the site (player or admin account).
+2. Open **AI access** (`/ai-access`).
+3. Click **Generate API token**, copy the token immediately (it is only shown
+   once). Regenerating invalidates the previous token.
+4. In your AI app, add a **custom MCP connector** (or equivalent) with:
+   - **URL** — the connector URL shown on `/ai-access` (your site's `/mcp` endpoint).
+   - **Auth** — Bearer token with the API token you generated.
+
+Per-client notes (also on `/ai-access`):
+
+| Client | Free tier | Setup |
+|--------|-----------|--------|
+| **Claude** (web, Desktop, mobile) | Yes — one custom connector | Settings → Connectors → add custom connector; URL + `Authorization: Bearer …` header. |
+| **ChatGPT** | No — Plus / Pro / Business / Enterprise / Edu | Enable Developer mode; add connector with URL; auth type **Token**. |
+| **Mistral Le Chat** | Yes | Intelligence → Connectors → Custom MCP Connector; Bearer token when prompted. |
+| **Cursor** | — | Add an entry to `mcp.json` with the connector URL and `Authorization` header (snippet on `/ai-access` after generating a token). |
+
+After connecting, enable the connector in a chat and ask natural-language
+questions — the model will call the tools above to fetch campaign data on demand
+instead of guessing from memory.
 
 ## Session reports (`REPORTS_FOLDER`)
 
@@ -277,6 +343,8 @@ docker compose exec app bin/phpunit
 | `/admin/hidden-paths` | Manage which folders/files are hidden |
 | `/reports/new` | Write and publish session reports (players) |
 | `/share/{token}` | Public read-only share link for a report |
+| `/ai-access` | MCP connector URL, API token, per-client setup (players) |
+| `/mcp` | MCP HTTP endpoint for AI clients (Bearer API token) |
 | `/webhook/sync` (POST) | Triggers a sync, bearer-token authenticated |
 
 ## Deployment
