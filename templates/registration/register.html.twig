@@ -1,19 +1,33 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/minimal.html.twig' %}
 
 {% block title %}Create your account — RPG Notes{% endblock %}
 
 {% block body %}
     <h1>Create your account</h1>
-    {% if error %}
-        <p class="form-error">{{ error }}</p>
-    {% endif %}
-    <form method="post">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
+    <p class="form-intro">You've been invited to join the Forgotten Realms campaign notes as <strong>{{ invitedLabel }}</strong>.</p>
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
+    <div class="auth-panel">
+        {% if error %}
+            <p class="form-error">{{ error }}</p>
+        {% endif %}
+        <form method="post" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
 
-        <button type="submit">Create account</button>
-    </form>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="new-password">
+                <p class="form-hint">You'll use this to log in after registration.</p>
+            </div>
+
+            <button type="submit" class="btn icon-btn">
+                {% include 'partials/_icon.html.twig' with { name: 'user-plus' } only %}
+                <span>Create account</span>
+            </button>
+        </form>
+    </div>
+
+    <p class="auth-footer">Already have an account? <a href="{{ path('login') }}">Log in</a>.</p>
 {% endblock %}

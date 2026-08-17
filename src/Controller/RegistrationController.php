@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Repository\UserRepository;
-use App\Service\Sidebar\SidebarBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +18,6 @@ final class RegistrationController extends AbstractController
         private readonly UserRepository $users,
         private readonly EntityManagerInterface $em,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly SidebarBuilder $sidebar,
     ) {
     }
 
@@ -29,9 +27,7 @@ final class RegistrationController extends AbstractController
         $user = $this->users->findOneByInviteToken($token);
 
         if ($user === null || !$user->isInviteValid()) {
-            return $this->render('registration/invalid_invite.html.twig', [
-                'sidebar' => $this->sidebar->build(),
-            ], new Response('', 404));
+            return $this->render('registration/invalid_invite.html.twig', [], new Response('', 404));
         }
 
         $error = null;
@@ -57,9 +53,8 @@ final class RegistrationController extends AbstractController
         }
 
         return $this->render('registration/register.html.twig', [
-            'token' => $token,
+            'invitedLabel' => $user->getLabel(),
             'error' => $error,
-            'sidebar' => $this->sidebar->build(),
         ]);
     }
 }

@@ -1,8 +1,17 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/minimal.html.twig' %}
 
 {% block title %}Invite link not valid — RPG Notes{% endblock %}
 
 {% block body %}
     <h1>This invite link is no longer valid</h1>
-    <p>Ask whoever invited you to send a new link.</p>
+
+    <div class="auth-panel">
+        <p>It may have expired or already been used. Ask whoever invited you to send a new link from <strong>Admin → Players</strong>.</p>
+    </div>
+
+    <p class="auth-footer">
+        <a href="{{ path('login') }}">Log in</a>
+        ·
+        <a href="{{ path('front_page') }}">Session reports</a>
+    </p>
 {% endblock %}
