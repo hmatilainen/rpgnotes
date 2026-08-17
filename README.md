@@ -145,34 +145,38 @@ docker compose exec app bin/phpunit
 | `/share/{token}` | Public read-only share link for a report |
 | `/webhook/sync` (POST) | Triggers a sync, bearer-token authenticated |
 
-## Deployment (Hetzner / rpg.kuura.art)
+## Deployment
 
-Production runs on `home_hetzner` with Apache terminating TLS and proxying to
-the app container on `127.0.0.1:8091`.
+Example layout: a VPS with Apache terminating TLS and proxying to the app
+container on `127.0.0.1:8091`.
 
 ### One-time server setup
 
-1. **DNS** — `A` record `rpg.kuura.art` → your server IP (`188.245.207.68`).
+1. **DNS** — `A` record `notes.example.com` → your server IP (e.g. `203.0.113.10`).
 2. **Secrets** — on the server, copy `.env.prod.example` to `.env.local` and
    fill in `APP_SECRET`, `VAULT_REPO_URL`, `SYNC_WEBHOOK_SECRET`,
-   `POSTGRES_PASSWORD`, and `DATABASE_URL` (see README vault section).
-   Set `DEFAULT_URI=https://rpg.kuura.art`.
-3. **Deploy** from your machine:
+   `POSTGRES_PASSWORD`, and `DATABASE_URL` (see vault section above).
+   Set `DEFAULT_URI=https://notes.example.com`.
+3. **Deploy** from your machine (configure `REMOTE` / `DEST` for your SSH host
+   and install path):
    ```bash
-   ./scripts/deploy-home-hetzner.sh
+   REMOTE=your-server ./scripts/deploy-home-hetzner.sh
    ```
-   (Uploads `.env.local` from your laptop if present.)
+   By default the deploy script keeps the server's existing `.env.local`; set
+   `UPLOAD_ENV_LOCAL=1` only if you intend to overwrite it from your laptop.
 4. **Create admin** (once):
    ```bash
-   ssh home_hetzner 'cd /opt/rpgnotes && docker compose -f docker-compose.yml -f docker-compose.prod.yml -p rpgnotes exec app bin/console app:create-admin'
+   ssh your-server 'cd /opt/rpgnotes && docker compose -f docker-compose.yml -f docker-compose.prod.yml -p rpgnotes exec app bin/console app:create-admin'
    ```
-5. **Apache + TLS** on the server (enable HTTP site first, cert, then SSL site):
+5. **Apache + TLS** on the server — copy `deploy/apache/` vhost files, set
+   `ServerName` to your hostname, enable sites, then obtain a certificate:
    ```bash
-   sudo cp /opt/rpgnotes/deploy/apache/rpg.kuura.art*.conf /etc/apache2/sites-available/
-   sudo a2ensite rpg.kuura.art.conf
+   sudo cp /opt/rpgnotes/deploy/apache/*.conf /etc/apache2/sites-available/
+   # Edit ServerName and paths in the copied files for your domain.
+   sudo a2ensite your-http-site.conf
    sudo systemctl reload apache2
-   sudo certbot certonly --apache -d rpg.kuura.art
-   sudo a2ensite rpg.kuura.art-le-ssl.conf
+   sudo certbot certonly --apache -d notes.example.com
+   sudo a2ensite your-ssl-site.conf
    sudo systemctl reload apache2
    ```
 
@@ -183,7 +187,7 @@ Add `docs/vault-github-action-sync.yml` to your **vault** repo as
 
 | Secret | Value |
 |--------|--------|
-| `RPGNOTES_SYNC_URL` | `https://rpg.kuura.art/webhook/sync` |
+| `RPGNOTES_SYNC_URL` | `https://notes.example.com/webhook/sync` |
 | `RPGNOTES_SYNC_SECRET` | same as `SYNC_WEBHOOK_SECRET` on the server |
 
 Every push to the vault repo triggers a pull + reindex on the server.
@@ -191,11 +195,8 @@ Every push to the vault repo triggers a pull + reindex on the server.
 ### Redeploy after code changes
 
 ```bash
-./scripts/deploy-home-hetzner.sh
+REMOTE=your-server ./scripts/deploy-home-hetzner.sh
 ```
-
-Deliberately deferred until Phase 3 shipped — production is now in scope at
-`https://rpg.kuura.art`.
 
 ## Roadmap
 
