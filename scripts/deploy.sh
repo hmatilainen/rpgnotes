@@ -22,6 +22,7 @@ rsync -avz --delete \
   --exclude 'var/' \
   --exclude 'vendor/' \
   --exclude '.env.local' \
+  --exclude 'scripts/deploy.local' \
   "${PROJECT_ROOT}/" "${REMOTE}:${DEST}/"
 
 if [[ "${UPLOAD_ENV_LOCAL:-}" == "1" && -f "${PROJECT_ROOT}/.env.local" ]]; then
