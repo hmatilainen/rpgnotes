@@ -1,0 +1,41 @@
+# Production overlay for Hetzner (Apache on host terminates TLS and proxies here).
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml -p rpgnotes up -d --build
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+      target: production
+    volumes: !reset []
+    ports: !override
+      - "127.0.0.1:8091:80"
+    env_file:
+      - .env
+      - path: .env.local
+        required: false
+    environment: !override
+      APP_ENV: prod
+      APP_DEBUG: "0"
+      VAULT_PATH: /var/vault/repo
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    ports: !reset []
+    env_file:
+      - .env
+      - path: .env.local
+        required: false
+    environment: !override
+      POSTGRES_USER: app
+      POSTGRES_DB: app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped

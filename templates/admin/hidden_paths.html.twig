@@ -4,7 +4,8 @@
 
 {% block body %}
     <h1>Hidden paths</h1>
-    <p>Folders or individual files, relative to the vault root (e.g. "A - GM" or "Journal/Session12.md"). Changes take effect on the next sync.</p>
+    <p>Folders or individual files, relative to the vault root. You can paste the vault path, note slug, or site URL.</p>
+    <p class="form-hint">Examples: <code>A - GM</code>, <code>People/Aidan - Watchful Order's Night Watch Agent.md</code>, <code>people/aidan-watchful-order-s-night-watch-agent</code>, or <code>/notes/people/aidan-watchful-order-s-night-watch-agent</code>. Run sync after adding.</p>
 
     <form method="post" action="{{ path('admin_hidden_paths_add') }}">
         <div class="form-group">

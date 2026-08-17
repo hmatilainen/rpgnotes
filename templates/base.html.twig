@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}RPG Notes{% endblock %}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
@@ -11,15 +12,33 @@
         <nav class="navbar-auth">
             {% if app.user %}
                 <span>Logged in as {{ app.user.userIdentifier }}</span>
+                {% if is_granted('ROLE_PLAYER') %}
+                    <a href="{{ path('session_report_new') }}" class="navbar-link">
+                        {% include 'partials/_icon.html.twig' with { name: 'quill' } only %}
+                        <span>New session report</span>
+                    </a>
+                    <a href="{{ path('ai_access') }}" class="navbar-link">
+                        {% include 'partials/_icon.html.twig' with { name: 'sparkles' } only %}
+                        <span>AI access</span>
+                    </a>
+                {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('admin_dashboard') }}">Admin</a>
+                    <a href="{{ path('admin_dashboard') }}" class="navbar-link">
+                        {% include 'partials/_icon.html.twig' with { name: 'shield' } only %}
+                        <span>Admin</span>
+                    </a>
                 {% endif %}
                 <form method="post" action="{{ path('logout') }}" class="navbar-logout-form">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
-                    <button type="submit" class="navbar-logout-button">Log out</button>
+                    <button type="submit" class="navbar-logout-button navbar-link">
+                        {% include 'partials/_icon.html.twig' with { name: 'log-out' } only %}
+                        <span>Log out</span>
+                    </button>
                 </form>
             {% else %}
-                <a href="{{ path('login') }}">Log in</a>
+                <a href="{{ path('login') }}" class="navbar-link">
+                    {% include 'partials/_icon.html.twig' with { name: 'log-in' } only %}
+                    <span>Log in</span>
+                </a>
             {% endif %}
         </nav>
     </header>

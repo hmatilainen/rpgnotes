@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Report published — RPG Notes{% endblock %}
+
+{% block body %}
+    <h1>Report published</h1>
+    <p class="flash-success">Report {{ published.report_number }} — {{ published.title }} is live.</p>
+
+    <p><a href="{{ path('note_show', {slug: published.note_slug}) }}">View on the site</a></p>
+
+    <div class="share-panel">
+        <p><strong>Share with the group on WhatsApp</strong> — send the link so everyone can read the session notes.</p>
+        <a href="{{ published.whatsapp_url }}" class="btn share-btn icon-btn" target="_blank" rel="noopener noreferrer">
+            {% include 'partials/_icon.html.twig' with { name: 'share' } only %}
+            <span>Share on WhatsApp</span>
+        </a>
+        <p class="form-hint">Share link: <a href="{{ published.share_url }}">{{ published.share_url }}</a></p>
+    </div>
+{% endblock %}

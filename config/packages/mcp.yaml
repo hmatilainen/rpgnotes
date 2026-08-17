@@ -1,0 +1,16 @@
+mcp:
+    app: 'Forgotten Realms Notes'
+    version: '1.0.0'
+    description: 'Session reports and campaign lore from rpg.kuura.art'
+    website_url: 'https://rpg.kuura.art'
+    instructions: |
+        Forgotten Realms D&D campaign notes. Session reports are mostly in Finnish under Reports/.
+        Use list_session_reports and get_session_report for session history.
+        Lore and NPCs live in folders like People/, Locations/. Wikilinks use [[Folder/Name]] syntax.
+    client_transports:
+        stdio: false
+        http: true
+    http:
+        path: /mcp
+        # Public server behind Apache TLS — Mistral/Claude connect server-side with varying Origin headers.
+        allowed_hosts: false

@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Entity\HiddenPath;
 use App\Repository\HiddenPathRepository;
 use App\Service\Sidebar\SidebarBuilder;
+use App\Service\Vault\HiddenPathNormalizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -21,6 +22,7 @@ final class HiddenPathController extends AbstractController
         private readonly HiddenPathRepository $hiddenPaths,
         private readonly EntityManagerInterface $em,
         private readonly SidebarBuilder $sidebar,
+        private readonly HiddenPathNormalizer $hiddenPathNormalizer,
     ) {
     }
 
@@ -40,7 +42,7 @@ final class HiddenPathController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $path = trim((string) $request->request->get('path'), " \t\n\r\0\x0B/");
+        $path = $this->hiddenPathNormalizer->normalize((string) $request->request->get('path'));
 
         if ($path !== '' && $this->hiddenPaths->findOneBy(['path' => $path]) === null) {
             $hiddenPath = new HiddenPath();

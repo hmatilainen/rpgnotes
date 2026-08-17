@@ -1,0 +1,93 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}AI access — RPG Notes{% endblock %}
+
+{% block body %}
+    <h1>Connect your AI assistant</h1>
+    <p class="form-intro">Use these campaign notes in Claude, ChatGPT, Mistral Le Chat, or Cursor — without scraping the website.</p>
+
+    <section class="ai-access-panel">
+        <h2>Your connector</h2>
+        <div class="snippet-block">
+            <label>Connector URL</label>
+            <code class="copy-snippet">{{ connector_url }}</code>
+        </div>
+
+        {% if flash_token %}
+            <div class="flash-success token-reveal">
+                <p><strong>New API token</strong> — copy it now. It will not be shown again.</p>
+                <code class="copy-snippet">{{ flash_token }}</code>
+            </div>
+        {% endif %}
+
+        <form method="post" action="{{ path('ai_access_token') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('ai_access_token') }}">
+            <button type="submit" class="btn">{{ flash_token ? 'Regenerate token' : 'Generate API token' }}</button>
+        </form>
+        <p class="form-hint">Treat the token like a password. Regenerating invalidates the old one — update your AI app settings after regenerating.</p>
+    </section>
+
+    {% if flash_token %}
+        <section class="ai-access-panel">
+            <h2>Authorization header (Claude)</h2>
+            <p>In Claude connector <strong>Request headers</strong>, add:</p>
+            <pre class="snippet-pre"><code>Authorization: Bearer {{ flash_token }}</code></pre>
+        </section>
+
+        <section class="ai-access-panel">
+            <h2>Cursor <code>mcp.json</code></h2>
+            <pre class="snippet-pre"><code>{
+  "mcpServers": {
+    "forgotten-realms": {
+      "url": "{{ connector_url }}",
+      "headers": {
+        "Authorization": "Bearer {{ flash_token }}"
+      }
+    }
+  }
+}</code></pre>
+        </section>
+    {% endif %}
+
+    <section class="ai-access-panel">
+        <h2>Claude (claude.ai, Desktop, mobile)</h2>
+        <p><strong>Free account:</strong> yes — one custom connector allowed.</p>
+        <ol class="instruction-list">
+            <li>Open <strong>Settings → Connectors</strong> (or Customize → Connectors).</li>
+            <li>Click <strong>Add custom connector</strong>.</li>
+            <li>Paste the <strong>Connector URL</strong> above.</li>
+            <li>Under <strong>Request headers</strong>, add <code>Authorization</code> with value <code>Bearer &lt;your token&gt;</code>.</li>
+            <li>Save and enable the connector in a chat.</li>
+        </ol>
+    </section>
+
+    <section class="ai-access-panel">
+        <h2>ChatGPT</h2>
+        <p><strong>Free account:</strong> no — needs Plus, Pro, Business, Enterprise, or Edu.</p>
+        <ol class="instruction-list">
+            <li>Enable <strong>Developer mode</strong> under Settings → Apps & Connectors.</li>
+            <li>Add a custom connector with the <strong>Connector URL</strong>.</li>
+            <li>Authentication: <strong>Token</strong> — paste your API token.</li>
+        </ol>
+    </section>
+
+    <section class="ai-access-panel">
+        <h2>Mistral Le Chat</h2>
+        <p><strong>Free account:</strong> yes.</p>
+        <ol class="instruction-list">
+            <li>Sidebar → <strong>Intelligence → Connectors</strong>.</li>
+            <li><strong>Custom MCP Connector</strong> → paste the <strong>Connector URL</strong> exactly (<code>https://rpg.kuura.art/mcp</code>).</li>
+            <li>When authentication is detected, choose <strong>Bearer token</strong> and paste your API token (not your site login password).</li>
+            <li>If connection fails after a few tries, delete the connector and add it again with a fresh token.</li>
+        </ol>
+    </section>
+
+    <section class="ai-access-panel">
+        <h2>Example questions</h2>
+        <ul>
+            <li>“Summarize the last three session reports.”</li>
+            <li>“What happened in report 90?”</li>
+            <li>“What do we know about Deerwater?”</li>
+        </ul>
+    </section>
+{% endblock %}

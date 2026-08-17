@@ -1,0 +1,51 @@
+{# Inline SVG icons — stroke style, currentColor. Use: {% include 'partials/_icon.html.twig' with { name: 'quill' } only %} #}
+<svg class="{{ class|default('icon') }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    {% if name == 'quill' %}
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+    {% elseif name == 'sparkles' %}
+        <path d="m12 3-1.9 4.8-4.8 1.9 4.8 1.9 1.9 4.8 1.9-4.8 4.8-1.9-4.8-1.9L12 3z"/>
+        <path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>
+    {% elseif name == 'shield' %}
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    {% elseif name == 'log-out' %}
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <path d="m16 17 5-5-5-5"/>
+        <path d="M21 12H9"/>
+    {% elseif name == 'log-in' %}
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <path d="m10 17-5-5 5-5"/>
+        <path d="M5 12h14"/>
+    {% elseif name == 'folder' %}
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+    {% elseif name == 'folder-open' %}
+        <path d="M6 14h12"/>
+        <path d="M6 18h12"/>
+        <path d="M6 22h12"/>
+        <path d="M6 6h8l2 2h6v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2"/>
+    {% elseif name == 'file-text' %}
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <path d="M14 2v6h6"/>
+        <path d="M16 13H8"/>
+        <path d="M16 17H8"/>
+        <path d="M10 9H8"/>
+    {% elseif name == 'chevron-left' %}
+        <path d="m15 18-6-6 6-6"/>
+    {% elseif name == 'chevron-right' %}
+        <path d="m9 18 6-6-6-6"/>
+    {% elseif name == 'share' %}
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+        <path d="m16 6-4-4-4 4"/>
+        <path d="M12 2v13"/>
+    {% elseif name == 'users' %}
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    {% elseif name == 'eye-off' %}
+        <path d="m17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+        <path d="m9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+        <path d="M1 1l22 22"/>
+        <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+    {% endif %}
+</svg>

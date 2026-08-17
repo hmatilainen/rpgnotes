@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Note;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -65,19 +66,21 @@ class NoteRepository extends ServiceEntityRepository
     }
 
     /**
-     * Always excludes the single newest report (see findNewestReport()),
-     * regardless of page — the caller renders that one separately as the
-     * front page's featured report.
+     * Paginated session reports newest-first.
+     *
+     * @param bool $skipFeaturedReport When true, excludes the newest report (front-page featured slot).
      *
      * @return Note[]
      */
-    public function findReportsPaginated(int $page, int $perPage, bool $includeHidden = false): array
+    public function findReportsPaginated(int $page, int $perPage, bool $includeHidden = false, bool $skipFeaturedReport = true): array
     {
+        $offset = ($page - 1) * $perPage + ($skipFeaturedReport ? 1 : 0);
+
         $qb = $this->createQueryBuilder('n')
             ->where('n.reportNumber IS NOT NULL')
             ->orderBy('n.reportNumber', 'DESC')
             ->addOrderBy('n.id', 'DESC')
-            ->setFirstResult(($page - 1) * $perPage + 1)
+            ->setFirstResult($offset)
             ->setMaxResults($perPage);
 
         if (!$includeHidden) {
@@ -147,5 +150,73 @@ class NoteRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getOneOrNullResult();
+    }
+
+    /**
+     * @return Note[]
+     */
+    public function searchByText(string $query, bool $includeHidden, int $limit, ?string $folder): array
+    {
+        $query = trim($query);
+        if ($query === '') {
+            return [];
+        }
+
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT n.id FROM notes n WHERE n.search_vector @@ plainto_tsquery(\'simple\', :q)';
+        $params = ['q' => $query];
+
+        if (!$includeHidden) {
+            $sql .= ' AND n.hidden = false';
+        }
+
+        if ($folder !== null && $folder !== '') {
+            $sql .= ' AND n.vault_path LIKE :folder_prefix';
+            $params['folder_prefix'] = rtrim($folder, '/') . '/%';
+        }
+
+        $sql .= ' ORDER BY ts_rank(n.search_vector, plainto_tsquery(\'simple\', :q)) DESC LIMIT :limit';
+
+        $types = ['q' => ParameterType::STRING, 'limit' => ParameterType::INTEGER];
+        if (isset($params['folder_prefix'])) {
+            $types['folder_prefix'] = ParameterType::STRING;
+        }
+
+        $ids = $conn->fetchFirstColumn($sql, array_merge($params, ['limit' => $limit]), $types);
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $notes = $this->findBy(['id' => $ids]);
+        $byId = [];
+        foreach ($notes as $note) {
+            $byId[$note->getId()] = $note;
+        }
+
+        $ordered = [];
+        foreach ($ids as $id) {
+            if (isset($byId[(int) $id])) {
+                $ordered[] = $byId[(int) $id];
+            }
+        }
+
+        return $ordered;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function findDistinctTopLevelFolders(bool $includeHidden = false): array
+    {
+        $qb = $this->createQueryBuilder('n')
+            ->select('DISTINCT n.topLevelFolder')
+            ->orderBy('n.topLevelFolder', 'ASC');
+
+        if (!$includeHidden) {
+            $qb->andWhere('n.hidden = false');
+        }
+
+        return array_column($qb->getQuery()->getScalarResult(), 'topLevelFolder');
     }
 }

@@ -1,0 +1,24 @@
+# Copy this file to your Obsidian vault GitHub repo as:
+#   .github/workflows/sync-rpgnotes.yml
+#
+# GitHub repo → Settings → Secrets → Actions:
+#   RPGNOTES_SYNC_URL     = https://rpg.kuura.art/webhook/sync
+#   RPGNOTES_SYNC_SECRET  = same value as SYNC_WEBHOOK_SECRET on the server
+
+name: Sync RPG Notes site
+
+on:
+  push:
+    branches: [master, main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger site reindex
+        run: |
+          curl -fsS -X POST "$RPGNOTES_SYNC_URL" \
+            -H "Authorization: Bearer $RPGNOTES_SYNC_SECRET"
+        env:
+          RPGNOTES_SYNC_URL: ${{ secrets.RPGNOTES_SYNC_URL }}
+          RPGNOTES_SYNC_SECRET: ${{ secrets.RPGNOTES_SYNC_SECRET }}

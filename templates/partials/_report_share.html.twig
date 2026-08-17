@@ -1,0 +1,8 @@
+{% if isReport %}
+    <p class="report-actions">
+        <a href="{{ path('note_share_whatsapp', {slug: note.slug}) }}" class="btn btn-small share-btn icon-btn">
+            {% include 'partials/_icon.html.twig' with { name: 'share' } only %}
+            <span>Share on WhatsApp</span>
+        </a>
+    </p>
+{% endif %}

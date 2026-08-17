@@ -141,25 +141,72 @@ docker compose exec app bin/phpunit
 | `/admin` | Admin dashboard |
 | `/admin/players` | Manage players and invite links |
 | `/admin/hidden-paths` | Manage which folders/files are hidden |
+| `/reports/new` | Write and publish session reports (players) |
+| `/share/{token}` | Public read-only share link for a report |
 | `/webhook/sync` (POST) | Triggers a sync, bearer-token authenticated |
 
-## Deployment
+## Deployment (Hetzner / rpg.kuura.art)
 
-Not yet configured. The site is intended to eventually live at
-`https://rpg.kuura.art`; production docker-compose, TLS, and DNS setup are
-still to do. Deliberately deferred until Phase 3 (below) ships, so the
-site isn't exposed publicly before player-facing features exist.
+Production runs on `home_hetzner` with Apache terminating TLS and proxying to
+the app container on `127.0.0.1:8091`.
+
+### One-time server setup
+
+1. **DNS** — `A` record `rpg.kuura.art` → your server IP (`188.245.207.68`).
+2. **Secrets** — on the server, copy `.env.prod.example` to `.env.local` and
+   fill in `APP_SECRET`, `VAULT_REPO_URL`, `SYNC_WEBHOOK_SECRET`,
+   `POSTGRES_PASSWORD`, and `DATABASE_URL` (see README vault section).
+   Set `DEFAULT_URI=https://rpg.kuura.art`.
+3. **Deploy** from your machine:
+   ```bash
+   ./scripts/deploy-home-hetzner.sh
+   ```
+   (Uploads `.env.local` from your laptop if present.)
+4. **Create admin** (once):
+   ```bash
+   ssh home_hetzner 'cd /opt/rpgnotes && docker compose -f docker-compose.yml -f docker-compose.prod.yml -p rpgnotes exec app bin/console app:create-admin'
+   ```
+5. **Apache + TLS** on the server (enable HTTP site first, cert, then SSL site):
+   ```bash
+   sudo cp /opt/rpgnotes/deploy/apache/rpg.kuura.art*.conf /etc/apache2/sites-available/
+   sudo a2ensite rpg.kuura.art.conf
+   sudo systemctl reload apache2
+   sudo certbot certonly --apache -d rpg.kuura.art
+   sudo a2ensite rpg.kuura.art-le-ssl.conf
+   sudo systemctl reload apache2
+   ```
+
+### Vault webhook (Obsidian → GitHub → site)
+
+Add `docs/vault-github-action-sync.yml` to your **vault** repo as
+`.github/workflows/sync-rpgnotes.yml`. Set GitHub Actions secrets:
+
+| Secret | Value |
+|--------|--------|
+| `RPGNOTES_SYNC_URL` | `https://rpg.kuura.art/webhook/sync` |
+| `RPGNOTES_SYNC_SECRET` | same as `SYNC_WEBHOOK_SECRET` on the server |
+
+Every push to the vault repo triggers a pull + reindex on the server.
+
+### Redeploy after code changes
+
+```bash
+./scripts/deploy-home-hetzner.sh
+```
+
+Deliberately deferred until Phase 3 shipped — production is now in scope at
+`https://rpg.kuura.art`.
 
 ## Roadmap
 
 - **Phase 1** — docker foundation, GitHub-synced read-only rendering site. ✅ Done.
 - **Phase 2** — admin account, invite-only player registration, admin-only
   hidden content. ✅ Done.
-- **Phase 3** — not yet designed:
-  1. In-app session note creation by logged-in players — write a session
-     note through the site itself, which pushes to GitHub (so it lands in
-     the local Obsidian vault on the next pull).
-  2. WhatsApp-only share links for published session notes.
+- **Phase 3** — player session report publishing with GitHub push-back, share
+  tokens, and manual WhatsApp share buttons. ✅ Done.
+- **Phase 4** — MCP server + logged-in “AI access” page (copy-paste connector
+  setup for Claude, ChatGPT, Mistral, Cursor). Spec:
+  `docs/superpowers/specs/2026-08-16-phase4-mcp-ai-access-design.md`
 - **Later / unscoped idea** — an MCP server so players can point Claude (or
   another MCP-aware AI) at the site to browse content directly, gated
   behind login once it exists. Raised in passing, not committed to any

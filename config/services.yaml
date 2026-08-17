@@ -43,6 +43,15 @@ services:
             $vaultPath: '%env(VAULT_PATH)%'
             $repoUrl: '%env(VAULT_REPO_URL)%'
 
+    App\Service\Vault\GitPublishService:
+        arguments:
+            $vaultPath: '%env(VAULT_PATH)%'
+            $repoUrl: '%env(VAULT_REPO_URL)%'
+
+    App\Service\SessionReport\SessionNotePublisher:
+        arguments:
+            $vaultPath: '%env(VAULT_PATH)%'
+
     App\Command\SyncNotesCommand:
         arguments:
             $vaultPath: '%env(VAULT_PATH)%'

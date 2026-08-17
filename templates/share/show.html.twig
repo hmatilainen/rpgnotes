@@ -1,0 +1,25 @@
+{% extends 'layout/minimal.html.twig' %}
+
+{% block title %}{{ note.title }} — RPG Notes{% endblock %}
+
+{% block body %}
+    <article class="shared-report">
+        {% if note.reportNumber is not null %}
+            <p class="report-meta">
+                Report {{ note.reportNumber }}
+                {% if note.sessionDate %}
+                    · In-game {{ note.sessionDate|date('j.n.Y') }}
+                {% endif %}
+                {% if note.publishedAt %}
+                    · Published {{ note.publishedAt|date('j M Y') }}
+                {% endif %}
+            </p>
+        {% endif %}
+
+        {% if not (note.html|trim starts with '<h1') %}
+            <h1>{{ note.title }}</h1>
+        {% endif %}
+        {{ note.html|raw }}
+    </article>
+    <p class="share-footer"><a href="{{ path('front_page') }}">More session reports on RPG Notes</a></p>
+{% endblock %}

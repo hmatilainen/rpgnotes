@@ -3,19 +3,65 @@
 {% block title %}{{ note.title }} — RPG Notes{% endblock %}
 
 {% block body %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <div class="note-admin-actions">
+            {% if note.hidden %}
+                <span class="note-hidden-badge">Hidden</span>
+                {% if hiddenByFolderRule %}
+                    <p class="form-hint">Hidden by a folder rule — remove it under <a href="{{ path('admin_hidden_paths') }}">Admin → Hidden paths</a>.</p>
+                {% else %}
+                    <form method="post" action="{{ path('note_unhide', {slug: note.slug}) }}" class="note-admin-form">
+                        <input type="hidden" name="_token" value="{{ csrf_token('note_unhide') }}">
+                        <button type="submit" class="btn btn-secondary btn-small">Unhide note</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <form method="post" action="{{ path('note_hide', {slug: note.slug}) }}" class="note-admin-form">
+                    <input type="hidden" name="_token" value="{{ csrf_token('note_hide') }}">
+                    <button type="submit" class="btn btn-secondary btn-small">Hide note</button>
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% for message in app.flashes('success') %}
+        <p class="flash-success">{{ message }}</p>
+    {% endfor %}
+    {% for message in app.flashes('warning') %}
+        <p class="flash-warning">{{ message }}</p>
+    {% endfor %}
+
+    {% if note.reportNumber is not null %}
+        <p class="report-meta">
+            Report {{ note.reportNumber }}
+            {% if note.sessionDate %}
+                · In-game {{ note.sessionDate|date('j.n.Y') }}
+            {% endif %}
+            {% if note.publishedAt %}
+                · Published {{ note.publishedAt|date('j M Y') }}
+            {% endif %}
+        </p>
+    {% endif %}
     <article>
         {% if not (note.html|trim starts with '<h1') %}
             <h1>{{ note.title }}</h1>
         {% endif %}
         {{ note.html|raw }}
     </article>
+    {% include 'partials/_report_share.html.twig' with {note: note, isReport: isReport} only %}
     {% if note.reportNumber is not null and (previousReport or nextReport) %}
         <nav class="report-nav">
             {% if previousReport %}
-                <a href="/notes/{{ previousReport.slug }}" class="report-nav-prev">← Previous session</a>
+                <a href="/notes/{{ previousReport.slug }}" class="report-nav-prev">
+                    {% include 'partials/_icon.html.twig' with { name: 'chevron-left' } only %}
+                    <span>Previous session</span>
+                </a>
             {% endif %}
             {% if nextReport %}
-                <a href="/notes/{{ nextReport.slug }}" class="report-nav-next">Next session →</a>
+                <a href="/notes/{{ nextReport.slug }}" class="report-nav-next">
+                    <span>Next session</span>
+                    {% include 'partials/_icon.html.twig' with { name: 'chevron-right' } only %}
+                </a>
             {% endif %}
         </nav>
     {% endif %}

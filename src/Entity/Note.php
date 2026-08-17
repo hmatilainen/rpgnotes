@@ -31,11 +31,21 @@ class Note
     #[ORM\Column(type: 'text')]
     private string $html = '';
 
+    #[ORM\Column(type: 'text')]
+    private string $bodyMarkdown = '';
+
+    /** @var list<array{path: string, slug: string, title: string}> */
+    #[ORM\Column(type: 'json')]
+    private array $wikilinks = [];
+
     #[ORM\Column(nullable: true)]
     private ?int $reportNumber = null;
 
     #[ORM\Column(type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $sessionDate = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $publishedAt = null;
 
     #[ORM\Column]
     private \DateTimeImmutable $updatedAt;
@@ -103,6 +113,32 @@ class Note
         $this->html = $html;
     }
 
+    public function getBodyMarkdown(): string
+    {
+        return $this->bodyMarkdown;
+    }
+
+    public function setBodyMarkdown(string $bodyMarkdown): void
+    {
+        $this->bodyMarkdown = $bodyMarkdown;
+    }
+
+    /**
+     * @return list<array{path: string, slug: string, title: string}>
+     */
+    public function getWikilinks(): array
+    {
+        return $this->wikilinks;
+    }
+
+    /**
+     * @param list<array{path: string, slug: string, title: string}> $wikilinks
+     */
+    public function setWikilinks(array $wikilinks): void
+    {
+        $this->wikilinks = $wikilinks;
+    }
+
     public function getReportNumber(): ?int
     {
         return $this->reportNumber;
@@ -121,6 +157,16 @@ class Note
     public function setSessionDate(?\DateTimeImmutable $sessionDate): void
     {
         $this->sessionDate = $sessionDate;
+    }
+
+    public function getPublishedAt(): ?\DateTimeImmutable
+    {
+        return $this->publishedAt;
+    }
+
+    public function setPublishedAt(?\DateTimeImmutable $publishedAt): void
+    {
+        $this->publishedAt = $publishedAt;
     }
 
     public function getUpdatedAt(): \DateTimeImmutable

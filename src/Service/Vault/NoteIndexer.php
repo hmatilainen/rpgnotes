@@ -8,11 +8,13 @@ use App\Entity\Note;
 use App\Repository\HiddenPathRepository;
 use App\Repository\NoteRepository;
 use App\Service\Markdown\CalloutStripper;
+use App\Service\Markdown\FrontmatterParser;
 use App\Service\Markdown\FrontmatterStripper;
 use App\Service\Markdown\ImagePlaceholderStripper;
 use App\Service\Markdown\NoteDraft;
 use App\Service\Markdown\ReportFilenameParser;
 use App\Service\Markdown\Slugifier;
+use App\Service\Markdown\WikilinkExtractor;
 use App\Service\Markdown\WikilinkIndex;
 use App\Service\Markdown\WikilinkTransformer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,10 +27,12 @@ class NoteIndexer
      */
     public function __construct(
         private readonly VaultFileScanner $scanner,
+        private readonly FrontmatterParser $frontmatterParser,
         private readonly FrontmatterStripper $frontmatterStripper,
         private readonly CalloutStripper $calloutStripper,
         private readonly ImagePlaceholderStripper $imageStripper,
         private readonly WikilinkTransformer $wikilinkTransformer,
+        private readonly WikilinkExtractor $wikilinkExtractor,
         private readonly Slugifier $slugifier,
         private readonly ReportFilenameParser $reportParser,
         private readonly ConverterInterface $markdownConverter,
@@ -58,6 +62,13 @@ class NoteIndexer
         $currentPaths = [];
 
         foreach ($drafts as $draft) {
+            $wikilinks = $draft->hidden
+                ? []
+                : $this->wikilinkExtractor->resolveVisible(
+                    $this->wikilinkExtractor->extractTargets($draft->strippedContent),
+                    $index,
+                );
+
             $withLinks = $this->wikilinkTransformer->transform($draft->strippedContent, $index);
             $html = (string) $this->markdownConverter->convert($withLinks);
 
@@ -67,8 +78,11 @@ class NoteIndexer
             $note->setTitle($draft->title);
             $note->setTopLevelFolder($draft->topLevelFolder);
             $note->setHtml($html);
+            $note->setBodyMarkdown($draft->strippedContent);
+            $note->setWikilinks($wikilinks);
             $note->setReportNumber($draft->reportNumber);
             $note->setSessionDate($draft->sessionDate);
+            $note->setPublishedAt($draft->publishedAt);
             $note->setHidden($draft->hidden);
             $note->setUpdatedAt(new \DateTimeImmutable());
 
@@ -82,6 +96,10 @@ class NoteIndexer
         }
 
         $this->em->flush();
+
+        $this->em->getConnection()->executeStatement(
+            'UPDATE notes SET search_vector = to_tsvector(\'simple\', coalesce(title, \'\') || \' \' || coalesce(body_markdown, \'\'))'
+        );
 
         return new IndexResult(updated: \count($drafts), deleted: \count($stale));
     }
@@ -138,6 +156,7 @@ class NoteIndexer
         );
 
         $reportMeta = $this->reportParser->parse($filename);
+        $publishedAt = $this->frontmatterParser->parsePublishedAt($raw);
 
         return new NoteDraft(
             vaultPath: $vaultPath,
@@ -147,6 +166,7 @@ class NoteIndexer
             strippedContent: $stripped,
             reportNumber: $reportMeta?->reportNumber,
             sessionDate: $reportMeta?->sessionDate,
+            publishedAt: $publishedAt,
             hidden: $this->hiddenPathMatcher->isHidden($vaultPath, $hiddenPaths),
         );
     }

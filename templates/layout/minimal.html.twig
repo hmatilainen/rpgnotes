@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}RPG Notes{% endblock %}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body class="minimal-layout">
+    <header class="navbar">
+        <a href="/">RPG Notes — Forgotten Realms</a>
+    </header>
+    <main class="content minimal-content">
+        {% block body %}{% endblock %}
+    </main>
+</body>
+</html>

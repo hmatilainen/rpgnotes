@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/app/Dockerfile
+      target: development
     ports:
       - "8091:80"
     environment:

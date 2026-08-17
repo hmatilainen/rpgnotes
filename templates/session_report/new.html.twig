@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Session Report — RPG Notes{% endblock %}
+
+{% block body %}
+    <h1>New session report</h1>
+    <p class="form-intro">Write what happened in the session. When you publish, the report is pushed to GitHub and appears on the site.</p>
+
+    {% for message in app.flashes('success') %}
+        <p class="flash-success">{{ message }}</p>
+    {% endfor %}
+
+    {% if errors.publish is defined %}
+        <p class="form-error">{{ errors.publish }}</p>
+    {% endif %}
+
+    <form method="post" action="{{ path('session_report_save') }}" class="session-report-form">
+        <div class="form-group form-group-wide">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" value="{{ draft ? draft.title : '' }}" required maxlength="255">
+            {% if errors.title is defined %}
+                <span class="form-error">{{ errors.title }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="session_date">In-game date</label>
+            <input type="text" id="session_date" name="session_date" value="{{ draft ? draft.sessionDate|date('j.n.Y') : '' }}" placeholder="16.8.1367" required>
+            {% if errors.session_date is defined %}
+                <span class="form-error">{{ errors.session_date }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group form-group-wide">
+            <label for="body">Session notes</label>
+            <textarea id="body" name="body" rows="16" required>{{ draft ? draft.body : '' }}</textarea>
+            <p class="form-hint">Plain text is fine. You can link to other notes with <code>[[Folder/Name]]</code> if you know them.</p>
+            {% if errors.body is defined %}
+                <span class="form-error">{{ errors.body }}</span>
+            {% endif %}
+        </div>
+
+        <input type="hidden" name="_token" value="{{ csrf_token('session_report') }}">
+        <div class="form-actions">
+            <button type="submit" name="action" value="save" class="btn btn-secondary">Save draft</button>
+            <button type="submit" name="action" value="publish" class="btn">Publish report</button>
+        </div>
+    </form>
+{% endblock %}

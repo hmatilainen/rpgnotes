@@ -1,9 +1,14 @@
 :root {
     --color-bg: #f4e9d5;
+    --color-bg-light: #faf4e8;
+    --color-bg-warm: #e8dcc4;
+    --color-bg-panel: #fffaf0;
     --color-text: #4a3826;
     --color-border: #c9b48a;
     --color-accent: #8a6d3b;
     --color-accent-hover: #6b5129;
+    --shadow-panel: 0 1px 3px rgba(74, 38, 26, 0.08), 0 4px 12px rgba(74, 38, 26, 0.04);
+    --transition-fast: 150ms ease;
 }
 
 * {
@@ -12,7 +17,14 @@
 
 body {
     margin: 0;
-    background: var(--color-bg);
+    background-color: var(--color-bg);
+    background-image: radial-gradient(
+        ellipse 120% 85% at 50% -10%,
+        var(--color-bg-light) 0%,
+        var(--color-bg) 50%,
+        var(--color-bg-warm) 100%
+    );
+    background-attachment: fixed;
     color: var(--color-text);
     font-family: Georgia, 'Times New Roman', serif;
     line-height: 1.6;
@@ -21,6 +33,7 @@ body {
 a {
     color: var(--color-accent);
     text-decoration: none;
+    transition: color var(--transition-fast);
 }
 
 a:hover {
@@ -29,7 +42,7 @@ a:hover {
 }
 
 .navbar {
-    background: var(--color-bg);
+    background: linear-gradient(to bottom, #ebe0cc 0%, var(--color-bg-light) 100%);
     border-bottom: 2px solid var(--color-border);
     padding: 16px 24px;
     display: flex;
@@ -41,6 +54,7 @@ a:hover {
     font-size: 22px;
     font-weight: bold;
     color: var(--color-text);
+    transition: color var(--transition-fast);
 }
 
 .navbar > a:hover {
@@ -64,6 +78,17 @@ a:hover {
     color: var(--color-accent);
 }
 
+.navbar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.navbar-link:hover {
+    text-decoration: none;
+}
+
 .navbar-logout-form {
     display: inline;
     margin: 0;
@@ -78,10 +103,44 @@ a:hover {
     border: none;
     padding: 0;
     cursor: pointer;
+    transition: color var(--transition-fast);
 }
 
 .navbar-logout-button:hover {
     color: var(--color-accent);
+}
+
+.icon {
+    display: block;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.icon--sm {
+    width: 14px;
+    height: 14px;
+}
+
+.icon--lg {
+    width: 20px;
+    height: 20px;
+}
+
+.icon-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-btn:hover {
+    text-decoration: none;
 }
 
 .layout {
@@ -115,10 +174,49 @@ a:hover {
     cursor: pointer;
     font-weight: bold;
     padding: 2px 0;
+    transition: color var(--transition-fast);
 }
 
 .sidebar details > summary:hover {
     color: var(--color-accent);
+}
+
+.sidebar a {
+    transition: color var(--transition-fast);
+}
+
+.sidebar-folder-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sidebar-folder-icons {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-accent);
+    opacity: 0.85;
+}
+
+.sidebar details[open] > summary .sidebar-icon-folder-closed {
+    display: none;
+}
+
+.sidebar details:not([open]) > summary .sidebar-icon-folder-open {
+    display: none;
+}
+
+.sidebar-note a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.sidebar-note .icon {
+    color: var(--color-accent);
+    opacity: 0.7;
+    position: relative;
+    top: 1px;
 }
 
 .content {
@@ -128,8 +226,100 @@ a:hover {
 }
 
 .content h1 {
+    border-bottom: none;
+    padding-bottom: 4px;
+    margin-bottom: 0;
+}
+
+.content h1::after {
+    content: '— ✦ —';
+    display: block;
+    text-align: center;
+    font-size: 0.7em;
+    font-weight: normal;
+    color: var(--color-border);
+    letter-spacing: 0.4em;
+    margin-top: 10px;
+    margin-bottom: 16px;
+}
+
+/* Note & report article typography */
+.content article h2 {
+    font-size: 1.35em;
+    margin-top: 1.75em;
+    margin-bottom: 0.5em;
+    font-variant: small-caps;
+    letter-spacing: 0.04em;
+    color: var(--color-accent-hover);
+}
+
+.content article h3 {
+    font-size: 1.1em;
+    margin-top: 1.5em;
+    margin-bottom: 0.4em;
+    color: var(--color-text);
+}
+
+.content article h4,
+.content article h5,
+.content article h6 {
+    margin-top: 1.25em;
+    margin-bottom: 0.35em;
+}
+
+.content blockquote {
+    margin: 1.25em 0;
+    padding: 0.75em 1.25em;
+    border-left: 3px solid var(--color-border);
+    background: rgba(255, 250, 240, 0.6);
+    color: var(--color-accent-hover);
+    font-style: italic;
+}
+
+.content blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+.content article a[href^="/notes/"] {
+    text-decoration: none;
+    border-bottom: 1px dotted var(--color-accent);
+}
+
+.content article a[href^="/notes/"]:hover {
+    border-bottom-style: solid;
+    text-decoration: none;
+}
+
+.content article table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25em 0;
+    font-size: 0.95em;
+}
+
+.content article th,
+.content article td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.content article th {
     border-bottom: 2px solid var(--color-border);
-    padding-bottom: 8px;
+    font-weight: bold;
+}
+
+.content article hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--color-border) 20%,
+        var(--color-border) 80%,
+        transparent
+    );
+    margin: 2em 0;
 }
 
 .report-list {
@@ -139,11 +329,221 @@ a:hover {
 }
 
 .report-list li {
-    padding: 8px 0;
+    padding: 8px 12px;
+    margin: 0 -12px;
     border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border-radius: 3px;
+    transition: background-color var(--transition-fast);
+}
+
+.report-list li:hover {
+    background-color: rgba(138, 109, 59, 0.06);
+}
+
+.report-list-main {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
     align-items: baseline;
+    gap: 16px;
+}
+
+.report-share-link {
+    font-size: 0.9em;
+    font-weight: bold;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.report-meta {
+    color: var(--color-accent);
+    font-size: 0.95em;
+    margin-bottom: 8px;
+    font-variant: small-caps;
+    letter-spacing: 0.03em;
+}
+
+.report-actions {
+    margin-top: 20px;
+}
+
+.note-admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.note-admin-form {
+    display: inline;
+}
+
+.note-hidden-badge {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #b0413e;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.share-panel {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-bg-panel);
+    box-shadow: var(--shadow-panel);
+}
+
+.share-btn {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.share-btn:hover {
+    text-decoration: none;
+    color: var(--color-bg);
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.9em;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--color-accent);
+    border: 2px solid var(--color-accent);
+    transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.btn-secondary:hover {
+    background: var(--color-accent);
+    color: var(--color-bg);
+}
+
+.form-group-wide {
+    max-width: 100%;
+}
+
+.form-intro,
+.form-hint {
+    font-size: 0.95em;
+}
+
+.form-hint code {
+    font-size: 0.9em;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+textarea {
+    font: inherit;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    background: var(--color-bg-panel);
+    color: var(--color-text);
+    width: 100%;
+    resize: vertical;
+    line-height: 1.5;
+    transition: border-color var(--transition-fast);
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.flash-success {
+    color: #2f6b3b;
+    font-weight: bold;
+}
+
+.flash-warning {
+    color: #785b02;
+    font-weight: bold;
+}
+
+.minimal-layout .minimal-content {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 40px;
+}
+
+.ai-access-panel {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-bg-panel);
+    box-shadow: var(--shadow-panel);
+}
+
+.ai-access-panel h2 {
+    margin-top: 0;
+    font-size: 1.15em;
+}
+
+.snippet-block {
+    margin-bottom: 16px;
+}
+
+.snippet-block label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.copy-snippet,
+.snippet-pre {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    padding: 10px 12px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    overflow-x: auto;
+    box-shadow: var(--shadow-panel);
+}
+
+.snippet-pre {
+    white-space: pre-wrap;
+}
+
+.instruction-list {
+    margin: 0;
+    padding-left: 1.25em;
+}
+
+.instruction-list li {
+    margin-bottom: 8px;
+}
+
+.token-reveal code {
+    display: block;
+    margin-top: 8px;
+}
+
+.share-footer {
+    margin-top: 32px;
+    font-size: 0.95em;
 }
 
 .report-date {
@@ -169,6 +569,9 @@ a:hover {
 .older-sessions-heading {
     font-size: 1.1em;
     margin-top: 0;
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    color: var(--color-accent-hover);
 }
 
 .report-nav {
@@ -182,10 +585,68 @@ a:hover {
 .report-nav-prev,
 .report-nav-next {
     font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .report-nav-next {
     margin-left: auto;
+}
+
+.admin-nav {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.admin-nav-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-bg-panel);
+    box-shadow: var(--shadow-panel);
+    text-decoration: none;
+    color: var(--color-text);
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.admin-nav-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 10px rgba(74, 38, 26, 0.1);
+    text-decoration: none;
+    color: var(--color-text);
+    transform: translateY(-1px);
+}
+
+.admin-nav-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-nav-icon {
+    color: var(--color-accent);
+}
+
+.admin-nav-label {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.admin-nav-desc {
+    font-size: 0.9em;
+    color: var(--color-accent-hover);
+    line-height: 1.45;
 }
 
 .form-group {
@@ -206,8 +667,9 @@ input[type="password"] {
     padding: 8px 10px;
     border: 1px solid var(--color-border);
     border-radius: 3px;
-    background: #fffaf0;
+    background: var(--color-bg-panel);
     color: var(--color-text);
+    transition: border-color var(--transition-fast);
 }
 
 input[type="text"]:focus,
@@ -225,6 +687,7 @@ input[type="password"]:focus {
     background: var(--color-accent);
     color: var(--color-bg);
     cursor: pointer;
+    transition: background-color var(--transition-fast);
 }
 
 .btn:hover {

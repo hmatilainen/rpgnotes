@@ -4,8 +4,26 @@
 
 {% block body %}
     <h1>Admin</h1>
-    <ul>
-        <li><a href="{{ path('admin_players') }}">Players</a></li>
-        <li><a href="{{ path('admin_hidden_paths') }}">Hidden paths</a></li>
+    <p class="form-intro">Site configuration and access control.</p>
+
+    <ul class="admin-nav">
+        <li>
+            <a href="{{ path('admin_players') }}" class="admin-nav-card">
+                <span class="admin-nav-card-header">
+                    {% include 'partials/_icon.html.twig' with { name: 'users', class: 'icon icon--lg admin-nav-icon' } only %}
+                    <span class="admin-nav-label">Players</span>
+                </span>
+                <span class="admin-nav-desc">Add players, send registration invites, and manage accounts.</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('admin_hidden_paths') }}" class="admin-nav-card">
+                <span class="admin-nav-card-header">
+                    {% include 'partials/_icon.html.twig' with { name: 'eye-off', class: 'icon icon--lg admin-nav-icon' } only %}
+                    <span class="admin-nav-label">Hidden paths</span>
+                </span>
+                <span class="admin-nav-desc">Hide folders or notes from players while keeping them indexed for admins.</span>
+            </a>
+        </li>
     </ul>
 {% endblock %}

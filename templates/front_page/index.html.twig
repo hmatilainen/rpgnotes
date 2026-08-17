@@ -9,9 +9,18 @@
                 <h1>{{ featuredReport.title }}</h1>
             {% endif %}
             {{ featuredReport.html|raw }}
+            <p class="report-actions">
+                <a href="{{ path('note_share_whatsapp', {slug: featuredReport.slug}) }}" class="btn btn-small share-btn icon-btn">
+                    {% include 'partials/_icon.html.twig' with { name: 'share' } only %}
+                    <span>Share on WhatsApp</span>
+                </a>
+            </p>
             {% if featuredPreviousReport %}
                 <nav class="report-nav">
-                    <a href="/notes/{{ featuredPreviousReport.slug }}" class="report-nav-prev">← Previous session</a>
+                    <a href="/notes/{{ featuredPreviousReport.slug }}" class="report-nav-prev">
+                        {% include 'partials/_icon.html.twig' with { name: 'chevron-left' } only %}
+                        <span>Previous session</span>
+                    </a>
                 </nav>
             {% endif %}
         </article>
@@ -22,21 +31,33 @@
     <ul class="report-list">
         {% for report in reports %}
             <li>
-                <a href="/notes/{{ report.slug }}">{{ report.title }}</a>
-                {% if report.sessionDate %}
-                    <span class="report-date">{{ report.sessionDate|date('d.m.Y') }}</span>
-                {% endif %}
+                <span class="report-list-main">
+                    <a href="/notes/{{ report.slug }}">{{ report.title }}</a>
+                    {% if report.sessionDate %}
+                        <span class="report-date">{{ report.sessionDate|date('d.m.Y') }}</span>
+                    {% endif %}
+                </span>
+                <a href="{{ path('note_share_whatsapp', {slug: report.slug}) }}" class="report-share-link icon-link">
+                    {% include 'partials/_icon.html.twig' with { name: 'share', class: 'icon icon--sm' } only %}
+                    <span>Share</span>
+                </a>
             </li>
         {% endfor %}
     </ul>
 
     <nav class="pagination">
         {% if page > 1 %}
-            <a href="?page={{ page - 1 }}">Previous</a>
+            <a href="?page={{ page - 1 }}" class="icon-link">
+                {% include 'partials/_icon.html.twig' with { name: 'chevron-left', class: 'icon icon--sm' } only %}
+                <span>Previous</span>
+            </a>
         {% endif %}
         <span>Page {{ page }} of {{ totalPages }}</span>
         {% if page < totalPages %}
-            <a href="?page={{ page + 1 }}">Next</a>
+            <a href="?page={{ page + 1 }}" class="icon-link">
+                <span>Next</span>
+                {% include 'partials/_icon.html.twig' with { name: 'chevron-right', class: 'icon icon--sm' } only %}
+            </a>
         {% endif %}
     </nav>
 {% endblock %}

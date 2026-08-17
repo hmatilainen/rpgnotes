@@ -8,3 +8,5 @@ when@prod:
     framework:
         router:
             strict_requirements: null
+        trusted_proxies: 'private_ranges'
+        trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']

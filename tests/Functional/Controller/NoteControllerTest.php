@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Controller;
 
+use App\Entity\HiddenPath;
 use App\Entity\Note;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,6 +34,7 @@ final class NoteControllerTest extends WebTestCase
     {
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $em->createQuery('DELETE FROM App\Entity\Note')->execute();
+        $em->createQuery('DELETE FROM '.HiddenPath::class)->execute();
         $em->createQuery('DELETE FROM App\Entity\User')->execute();
     }
 
@@ -213,6 +215,70 @@ final class NoteControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('body', 'Top secret.');
+    }
+
+    public function testAdminCanHideAndUnhideNote(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $note = new Note();
+        $note->setVaultPath('People/Malekith.md');
+        $note->setSlug('people/malekith');
+        $note->setTitle('Malekith');
+        $note->setTopLevelFolder('People');
+        $note->setHtml('<p>Visible lore.</p>');
+        $em->persist($note);
+        $em->flush();
+
+        $admin = $this->makeUser($em, 'admin-hide', 'ROLE_ADMIN');
+        $client->loginUser($admin);
+
+        $client->request('GET', '/notes/people/malekith');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('body', 'Hide note');
+
+        $client->submitForm('Hide note');
+        self::assertResponseRedirects('/notes/people/malekith');
+        $client->followRedirect();
+
+        self::ensureKernelShutdown();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $note = $em->getRepository(Note::class)->findOneBySlug('people/malekith');
+        self::assertNotNull($note);
+        self::assertTrue($note->isHidden());
+
+        $client->submitForm('Unhide note');
+        self::assertResponseRedirects('/notes/people/malekith');
+
+        self::ensureKernelShutdown();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $note = $em->getRepository(Note::class)->findOneBySlug('people/malekith');
+        self::assertNotNull($note);
+        self::assertFalse($note->isHidden());
+        self::assertNull($em->getRepository(HiddenPath::class)->findOneBy(['path' => 'People/Malekith.md']));
+    }
+
+    public function testShareWhatsAppRouteMatchesNestedReportSlug(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $note = new Note();
+        $note->setVaultPath('Reports/81-90/Report-90 Back in Everlund.md');
+        $note->setSlug('reports/81-90/report-90-back-in-everlund');
+        $note->setTitle('Report-90 Back in Everlund');
+        $note->setTopLevelFolder('Reports');
+        $note->setHtml('<p>Back in town.</p>');
+        $note->setReportNumber(90);
+        $note->setUpdatedAt(new \DateTimeImmutable());
+        $em->persist($note);
+        $em->flush();
+
+        $client->request('GET', '/notes/reports/81-90/report-90-back-in-everlund/share');
+
+        self::assertResponseRedirects();
+        self::assertStringStartsWith('https://wa.me/', $client->getResponse()->headers->get('Location'));
     }
 
     private function makeHiddenNote(EntityManagerInterface $em): Note

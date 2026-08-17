@@ -10,6 +10,12 @@ security:
                 property: username
 
     firewalls:
+        mcp:
+            pattern: ^/mcp
+            stateless: true
+            provider: app_user_provider
+            custom_authenticators:
+                - App\Security\ApiTokenAuthenticator
         main:
             lazy: true
             provider: app_user_provider
@@ -21,7 +27,13 @@ security:
             logout:
                 path: logout
                 target: front_page
-                enable_csrf: true
+                enable_csrf: false
 
     access_control:
+        - { path: ^/mcp, roles: ROLE_PLAYER }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/reports, roles: ROLE_PLAYER }
+        - { path: ^/ai-access, roles: ROLE_PLAYER }
+
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_PLAYER
