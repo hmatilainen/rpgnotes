@@ -1,11 +1,15 @@
 # RPG Notes
 
-A self-hosted site that publishes an Obsidian vault of RPG campaign notes
-(the "Forgotten Realms" vault, synced from a private GitHub repo). Session
-reports show up on the front page newest-first, other notes are browsable
-via a collapsible sidebar, and Obsidian wikilinks resolve into working
-links. Admin accounts and invite-only player registration gate a small set
-of hidden GM-only folders/files.
+A self-hosted site that publishes an Obsidian vault of RPG campaign notes.
+Session reports show up on the front page newest-first, other notes are 
+browsaeble via a collapsible sidebar, and Obsidian wikilinks resolve into 
+working links. Admin accounts and invite-only player registration gate a 
+small set of hidden GM-only folders/files.
+
+Just a hobby-project for my own amusement, created entirely with Cursor 
+as I didn't want to spend weeks churning out relatively simple code to 
+get this done asap. I still thought I'd make this public, in case someone
+else is trying to solve the same issue (whatever it is). 
 
 **Live demo:** [rpg.kuura.art](https://rpg.kuura.art) — a Forgotten Realms
 campaign vault (read-only for visitors; log in only if you have an account).
