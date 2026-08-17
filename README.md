@@ -28,6 +28,63 @@ see the updates on the site.
 report in the browser; the app commits it to the vault repo on GitHub. Your
 next Git pull in Obsidian brings that report back into your local vault.
 
+## Session reports (`Reports/` folder)
+
+Session reports are **not** mixed into the sidebar tree. They live under a
+top-level `Reports/` folder in your vault, appear on the site home page
+(newest first), and are recognized by a strict filename pattern. The folder
+name and layout are **fixed in code today** — there is no `.env` setting to
+rename `Reports` or change the pattern (only `VAULT_PATH` and `VAULT_REPO_URL`
+point the app at your repo).
+
+### Vault layout
+
+```
+Reports/
+  1-10/
+    Report-1 20.2.1367 Short session title.md
+    Report-2 16.8.1367 Another title.md
+  11-20/
+    Report-11 …
+  21-30/
+    …
+```
+
+- **Range subfolders** — ten reports per folder: `1-10`, `11-20`, `21-30`, …
+  (report #41 → `Reports/41-50/`).
+- **Filename** — `Report-{number} {in-game date} {title}.md`
+  - `{number}` — session number, used for ordering and “report #N” on the site.
+  - `{in-game date}` — optional but recommended: `D.M.YYYY` (e.g. `16.8.1367`).
+    Older vault files with Finnish weekday/month names in the filename still
+    index as reports, but without a parsed in-game date.
+  - `{title}` — short session title; unsafe path characters are stripped when
+    players publish via the site.
+
+Example path:
+
+`Reports/41-50/Report-41 16.8.1367 Matka laaksoon.md`
+
+### Player-published reports
+
+When a player publishes from `/reports/new`, the app:
+
+1. Allocates the next report number by scanning existing `Report-*.md` files
+   under `Reports/`.
+2. Writes the file under the correct range folder with the filename above.
+3. Adds YAML frontmatter (`published_at`, `author`) and a `## Title` heading
+   in the body.
+4. Commits and pushes to your vault repo (your PAT must allow write access).
+
+That Git push triggers the vault Action → site webhook, so the report appears
+on the home page without a manual sync.
+
+### GM-authored reports in Obsidian
+
+You can add or edit `Report-*.md` files directly in Obsidian and push like
+any other note. Follow the same folder and filename conventions so the site
+lists them as session reports. Non-matching `.md` files elsewhere in the
+vault become regular notes in the sidebar.
+
 ## Stack
 
 Symfony 7.4 (PHP 8.3) on FrankenPHP, PostgreSQL 16, all via docker-compose.
