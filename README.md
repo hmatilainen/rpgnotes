@@ -7,6 +7,11 @@ via a collapsible sidebar, and Obsidian wikilinks resolve into working
 links. Admin accounts and invite-only player registration gate a small set
 of hidden GM-only folders/files.
 
+**Live demo:** [rpg.kuura.art](https://rpg.kuura.art) — a Forgotten Realms
+campaign vault (read-only for visitors; log in only if you have an account).
+
+![RPG Notes front page — featured session report and sidebar](docs/demo-home.png)
+
 ## How it works
 
 1. **Publish your Obsidian vault to GitHub** — use a Git plugin in Obsidian
