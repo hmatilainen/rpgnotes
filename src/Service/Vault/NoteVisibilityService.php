@@ -7,15 +7,32 @@ namespace App\Service\Vault;
 use App\Entity\HiddenPath;
 use App\Entity\Note;
 use App\Repository\HiddenPathRepository;
+use App\Repository\NoteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class NoteVisibilityService
 {
     public function __construct(
         private readonly HiddenPathRepository $hiddenPaths,
+        private readonly NoteRepository $notes,
         private readonly HiddenPathMatcher $hiddenPathMatcher,
         private readonly EntityManagerInterface $em,
     ) {
+    }
+
+    /**
+     * Recomputes Note.hidden for every indexed note from hidden-path rules.
+     * Admin folder rules take effect immediately instead of waiting for vault sync.
+     */
+    public function syncHiddenFlagsFromRules(): void
+    {
+        $hiddenPaths = $this->hiddenPaths->findAllPaths();
+
+        foreach ($this->notes->findAll() as $note) {
+            $note->setHidden($this->hiddenPathMatcher->isHidden($note->getVaultPath(), $hiddenPaths));
+        }
+
+        $this->em->flush();
     }
 
     public function hide(Note $note): void

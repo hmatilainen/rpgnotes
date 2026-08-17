@@ -8,6 +8,7 @@ use App\Entity\HiddenPath;
 use App\Repository\HiddenPathRepository;
 use App\Service\Sidebar\SidebarBuilder;
 use App\Service\Vault\HiddenPathNormalizer;
+use App\Service\Vault\NoteVisibilityService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -23,6 +24,7 @@ final class HiddenPathController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly SidebarBuilder $sidebar,
         private readonly HiddenPathNormalizer $hiddenPathNormalizer,
+        private readonly NoteVisibilityService $visibility,
     ) {
     }
 
@@ -49,6 +51,7 @@ final class HiddenPathController extends AbstractController
             $hiddenPath->setPath($path);
             $this->em->persist($hiddenPath);
             $this->em->flush();
+            $this->visibility->syncHiddenFlagsFromRules();
         }
 
         return $this->redirectToRoute('admin_hidden_paths');
@@ -66,6 +69,7 @@ final class HiddenPathController extends AbstractController
         if ($hiddenPath !== null) {
             $this->em->remove($hiddenPath);
             $this->em->flush();
+            $this->visibility->syncHiddenFlagsFromRules();
         }
 
         return $this->redirectToRoute('admin_hidden_paths');

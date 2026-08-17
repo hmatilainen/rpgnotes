@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional\Controller\Admin;
 
 use App\Entity\HiddenPath;
+use App\Entity\Note;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -28,6 +29,7 @@ final class HiddenPathControllerTest extends WebTestCase
     private function cleanUp(): void
     {
         $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->createQuery('DELETE FROM App\Entity\Note')->execute();
         $em->createQuery('DELETE FROM App\Entity\User')->execute();
         $em->createQuery('DELETE FROM App\Entity\HiddenPath')->execute();
     }
@@ -68,6 +70,41 @@ final class HiddenPathControllerTest extends WebTestCase
         self::assertResponseRedirects('/admin/hidden-paths');
         $client->followRedirect();
         self::assertSelectorTextNotContains('body', 'Locations/Deerwater.md');
+    }
+
+    public function testAddingFolderHiddenPathHidesMatchingNotesImmediately(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $note = new Note();
+        $note->setVaultPath('A - GM/Secret Plot.md');
+        $note->setSlug('a-gm/secret-plot');
+        $note->setTitle('Secret Plot');
+        $note->setTopLevelFolder('A - GM');
+        $note->setHtml('<p>Top secret.</p>');
+        $em->persist($note);
+        $em->flush();
+
+        $client->request('GET', '/notes/a-gm/secret-plot');
+        self::assertResponseIsSuccessful();
+
+        $admin = $this->createAdmin();
+        $client->loginUser($admin);
+
+        $crawler = $client->request('GET', '/admin/hidden-paths');
+        $form = $crawler->filter('form[action$="/admin/hidden-paths/add"]')->form();
+        $client->submit($form, ['path' => 'A - GM']);
+
+        self::ensureKernelShutdown();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $note = $em->getRepository(Note::class)->findOneBySlug('a-gm/secret-plot');
+        self::assertNotNull($note);
+        self::assertTrue($note->isHidden());
+
+        $client->restart();
+        $client->request('GET', '/notes/a-gm/secret-plot');
+        self::assertResponseStatusCodeSame(404);
     }
 
     private function createAdmin(): User
