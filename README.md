@@ -103,6 +103,26 @@ After connecting, enable the connector in a chat and ask natural-language
 questions — the model will call the tools above to fetch campaign data on demand
 instead of guessing from memory.
 
+## Down the line
+
+This is still a hobby project, but a fun long-term direction would be to make
+it easier for other GMs to use without running the whole stack themselves.
+
+- **Multi-campaign support** — more than one GM/admin, each with their own
+  campaign, players, hidden paths, MCP endpoint, and notes index.
+- **GitHub OAuth / GitHub App flow** — let a GM connect a vault repo through
+  GitHub auth instead of pasting PATs into config.
+- **Hosted onboarding** — create a campaign, link the repo, set the reports
+  folder, invite players, and start using the site without Docker, Apache, or
+  manual webhook setup.
+- **Same core idea, just easier** — Obsidian stays the source of truth, players
+  get a browser UI, session reports flow back to the vault, and AI clients can
+  use MCP with the same visibility rules.
+
+That would still be niche, but it would move the project from “self-hosted app
+for me” toward “free hobby service for Obsidian GMs who want a simple player
+portal and MCP access.”
+
 ## Session reports (`REPORTS_FOLDER`)
 
 Session reports are **not** mixed into the sidebar tree. They live under a
