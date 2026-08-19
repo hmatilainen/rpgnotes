@@ -58,12 +58,7 @@ services:
                 html_input: 'escape'
                 allow_unsafe_links: false
 
-    App\Service\Vault\GitSyncService:
-        arguments:
-            $vaultPath: '%env(VAULT_PATH)%'
-            $repoUrl: '%env(VAULT_REPO_URL)%'
-
-    App\Service\Vault\GitPublishService:
+    App\Service\Vault\VaultGitCheckout:
         arguments:
             $vaultPath: '%env(VAULT_PATH)%'
             $repoUrl: '%env(VAULT_REPO_URL)%'

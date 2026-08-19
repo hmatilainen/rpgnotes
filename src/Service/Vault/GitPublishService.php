@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service\Vault;
 
-use Symfony\Component\Process\Process;
-
 final class GitPublishService
 {
     public function __construct(
-        private readonly string $vaultPath,
-        private readonly string $repoUrl,
+        private readonly VaultGitCheckout $checkout,
         private readonly string $committerEmail = 'rpgnotes@localhost',
         private readonly string $committerName = 'RPG Notes',
     ) {
@@ -18,63 +15,46 @@ final class GitPublishService
 
     public function syncToRemote(): void
     {
-        if (!is_dir($this->vaultPath . '/.git')) {
-            $this->run(['git', 'clone', $this->repoUrl, $this->vaultPath]);
-
-            return;
-        }
-
-        $this->run(['git', '-C', $this->vaultPath, 'fetch', 'origin']);
-        $this->run(['git', '-C', $this->vaultPath, 'reset', '--hard', 'origin/HEAD']);
+        $this->checkout->withLock(
+            fn () => $this->checkout->fastForwardToRemote(allowUnpushedLocal: true)
+        );
     }
 
     public function addAndPush(string $relativeVaultPath, string $content, string $commitMessage): void
     {
-        $this->syncToRemote();
+        $this->checkout->withLock(function () use ($relativeVaultPath, $content, $commitMessage): void {
+            $this->checkout->fastForwardToRemote(allowUnpushedLocal: true);
 
-        $absolutePath = $this->vaultPath . '/' . $relativeVaultPath;
-        $directory = \dirname($absolutePath);
+            if ($this->checkout->vaultFileExists($relativeVaultPath)) {
+                throw new \RuntimeException(sprintf(
+                    'Vault file already exists: %s',
+                    $relativeVaultPath,
+                ));
+            }
 
-        if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
-            throw new \RuntimeException(sprintf('Unable to create directory: %s', $directory));
-        }
+            $absolutePath = $this->checkout->getVaultPath() . '/' . $relativeVaultPath;
+            $directory = \dirname($absolutePath);
 
-        if (file_put_contents($absolutePath, $content) === false) {
-            throw new \RuntimeException(sprintf('Unable to write vault file: %s', $absolutePath));
-        }
+            if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
+                throw new \RuntimeException(sprintf('Unable to create directory: %s', $directory));
+            }
 
-        $this->configureCommitter();
-        $this->run(['git', '-C', $this->vaultPath, 'add', $relativeVaultPath]);
-        $this->run(['git', '-C', $this->vaultPath, 'commit', '-m', $commitMessage]);
-        $this->run(['git', '-C', $this->vaultPath, 'push', 'origin', 'HEAD']);
+            if (file_put_contents($absolutePath, $content) === false) {
+                throw new \RuntimeException(sprintf('Unable to write vault file: %s', $absolutePath));
+            }
+
+            $vaultPath = $this->checkout->getVaultPath();
+            $this->configureCommitter();
+            $this->checkout->run(['git', '-C', $vaultPath, 'add', $relativeVaultPath]);
+            $this->checkout->run(['git', '-C', $vaultPath, 'commit', '-m', $commitMessage]);
+            $this->checkout->run(['git', '-C', $vaultPath, 'push', 'origin', 'HEAD']);
+        });
     }
 
     private function configureCommitter(): void
     {
-        $this->run(['git', '-C', $this->vaultPath, 'config', 'user.email', $this->committerEmail]);
-        $this->run(['git', '-C', $this->vaultPath, 'config', 'user.name', $this->committerName]);
-    }
-
-    /**
-     * @param string[] $command
-     */
-    private function run(array $command): void
-    {
-        $process = new Process($command);
-        $process->setTimeout(120);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException(sprintf(
-                'Git command "%s" failed: %s',
-                $this->redactCredentials(implode(' ', $command)),
-                $this->redactCredentials($process->getErrorOutput())
-            ));
-        }
-    }
-
-    private function redactCredentials(string $value): string
-    {
-        return preg_replace('#(https?://)[^/@\s]+@#', '$1***@', $value) ?? $value;
+        $vaultPath = $this->checkout->getVaultPath();
+        $this->checkout->run(['git', '-C', $vaultPath, 'config', 'user.email', $this->committerEmail]);
+        $this->checkout->run(['git', '-C', $vaultPath, 'config', 'user.name', $this->committerName]);
     }
 }

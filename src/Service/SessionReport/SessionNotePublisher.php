@@ -6,7 +6,6 @@ namespace App\Service\SessionReport;
 
 use App\Entity\SessionNoteDraft;
 use App\Entity\ShareToken;
-use App\Entity\User;
 use App\Repository\NoteRepository;
 use App\Repository\ShareTokenRepository;
 use App\Service\Vault\GitPublishService;
@@ -38,6 +37,8 @@ final class SessionNotePublisher
             throw new \RuntimeException('Draft author has no username.');
         }
 
+        $this->gitPublish->syncToRemote();
+
         $publishedAt = new \DateTimeImmutable();
         $reportNumber = $this->reportNumbers->allocateNext($this->vaultPath);
         $vaultPath = $this->reportFiles->buildVaultPath(
@@ -62,13 +63,12 @@ final class SessionNotePublisher
             throw new \RuntimeException(sprintf('Published note not found after index: %s', $vaultPath));
         }
 
-        $existingToken = $this->shareTokens->findOneBy(['note' => $note]);
-        if ($existingToken !== null) {
-            return $existingToken;
+        $token = $this->shareTokens->findOneBy(['note' => $note]);
+        if ($token === null) {
+            $token = new ShareToken($note, bin2hex(random_bytes(32)));
+            $this->em->persist($token);
         }
 
-        $token = new ShareToken($note, bin2hex(random_bytes(32)));
-        $this->em->persist($token);
         $this->em->remove($draft);
         $this->em->flush();
 

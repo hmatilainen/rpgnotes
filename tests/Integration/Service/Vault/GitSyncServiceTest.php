@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Service\Vault;
 
 use App\Service\Vault\GitSyncService;
+use App\Service\Vault\VaultGitCheckout;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
 
@@ -12,6 +13,7 @@ final class GitSyncServiceTest extends TestCase
 {
     private string $bareRepoPath;
     private string $checkoutPath;
+    private GitSyncService $service;
 
     protected function setUp(): void
     {
@@ -35,20 +37,20 @@ final class GitSyncServiceTest extends TestCase
         // was ever pushed. Without repointing HEAD, `git clone` checks out the
         // unborn master branch (no files) instead of main.
         (new Process(['git', '-C', $this->bareRepoPath, 'symbolic-ref', 'HEAD', 'refs/heads/main']))->mustRun();
+
+        $this->service = new GitSyncService(new VaultGitCheckout($this->checkoutPath, $this->bareRepoPath));
     }
 
     public function testClonesRepoWhenCheckoutDoesNotExist(): void
     {
-        $service = new GitSyncService($this->checkoutPath, $this->bareRepoPath);
-        $service->sync();
+        $this->service->sync();
 
         self::assertFileExists($this->checkoutPath . '/note.md');
     }
 
     public function testPullsLatestChangesWhenCheckoutAlreadyExists(): void
     {
-        $service = new GitSyncService($this->checkoutPath, $this->bareRepoPath);
-        $service->sync();
+        $this->service->sync();
 
         // Push a new commit to the bare repo from a second clone.
         $secondClone = sys_get_temp_dir() . '/rpgnotes-second-' . uniqid();
@@ -60,7 +62,7 @@ final class GitSyncServiceTest extends TestCase
         (new Process(['git', '-C', $secondClone, 'commit', '-m', 'second']))->mustRun();
         (new Process(['git', '-C', $secondClone, 'push', 'origin', 'main']))->mustRun();
 
-        $service->sync();
+        $this->service->sync();
 
         self::assertFileExists($this->checkoutPath . '/note2.md');
     }
@@ -86,7 +88,7 @@ final class GitSyncServiceTest extends TestCase
         (new Process(['git', '-C', $seedPath, 'push', 'origin', 'master']))->mustRun();
         (new Process(['git', '-C', $bareRepoPath, 'symbolic-ref', 'HEAD', 'refs/heads/master']))->mustRun();
 
-        $service = new GitSyncService($checkoutPath, $bareRepoPath);
+        $service = new GitSyncService(new VaultGitCheckout($checkoutPath, $bareRepoPath));
         $service->sync();
         self::assertFileExists($checkoutPath . '/note.md');
 
@@ -100,9 +102,26 @@ final class GitSyncServiceTest extends TestCase
         self::assertFileExists($checkoutPath . '/note2.md');
     }
 
+    public function testAbortsSyncWhenLocalHasUnpushedCommits(): void
+    {
+        $this->service->sync();
+
+        $checkout = new VaultGitCheckout($this->checkoutPath, $this->bareRepoPath);
+        file_put_contents($this->checkoutPath . '/local-only.md', "# Local only\n");
+        $checkout->run(['git', '-C', $this->checkoutPath, 'config', 'user.email', 'test@example.com']);
+        $checkout->run(['git', '-C', $this->checkoutPath, 'config', 'user.name', 'Test']);
+        $checkout->run(['git', '-C', $this->checkoutPath, 'add', 'local-only.md']);
+        $checkout->run(['git', '-C', $this->checkoutPath, 'commit', '-m', 'unpushed']);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('unpushed commits');
+
+        $this->service->sync();
+    }
+
     public function testThrowsOnInvalidRepoUrl(): void
     {
-        $service = new GitSyncService($this->checkoutPath, '/nonexistent/path/to/repo');
+        $service = new GitSyncService(new VaultGitCheckout($this->checkoutPath, '/nonexistent/path/to/repo'));
 
         $this->expectException(\RuntimeException::class);
         $service->sync();
@@ -110,10 +129,10 @@ final class GitSyncServiceTest extends TestCase
 
     public function testExceptionMessageDoesNotLeakCredentialsFromRepoUrl(): void
     {
-        $service = new GitSyncService(
+        $service = new GitSyncService(new VaultGitCheckout(
             $this->checkoutPath,
             'https://user:secret123@nonexistent.invalid/repo.git'
-        );
+        ));
 
         try {
             $service->sync();
