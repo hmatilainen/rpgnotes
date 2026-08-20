@@ -86,6 +86,10 @@ final class AiAccessControllerTest extends WebTestCase
         $client->request('POST', '/mcp', content: '{"jsonrpc":"2.0","method":"initialize","id":1,"params":{}}');
 
         self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame(
+            'WWW-Authenticate',
+            'Bearer resource_metadata="https://rpg.kuura.art/.well-known/oauth-protected-resource"',
+        );
     }
 
     private function createPlayer(string $username): User

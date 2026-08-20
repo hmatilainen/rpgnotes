@@ -47,6 +47,10 @@ services:
         arguments:
             $reportsFolder: '@App\Service\Vault\ReportsFolder'
 
+    App\Service\OAuth\OAuthServerConfig:
+        arguments:
+            $defaultUri: '%env(DEFAULT_URI)%'
+
     App\Service\Mcp\McpNoteService:
         arguments:
             $reportsFolder: '@App\Service\Vault\ReportsFolder'

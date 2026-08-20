@@ -6,6 +6,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Service\Api\UserApiTokenService;
+use App\Service\OAuth\OAuthServerConfig;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -20,6 +21,7 @@ final class ApiTokenAuthenticator extends AbstractAuthenticator
 {
     public function __construct(
         private readonly UserApiTokenService $apiTokens,
+        private readonly OAuthServerConfig $oauthConfig,
     ) {
     }
 
@@ -51,6 +53,12 @@ final class ApiTokenAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
-        return new Response($exception->getMessage(), Response::HTTP_UNAUTHORIZED);
+        $response = new Response('', Response::HTTP_UNAUTHORIZED);
+        $response->headers->set(
+            'WWW-Authenticate',
+            'Bearer resource_metadata="'.$this->oauthConfig->getProtectedResourceMetadataUrl().'"',
+        );
+
+        return $response;
     }
 }
