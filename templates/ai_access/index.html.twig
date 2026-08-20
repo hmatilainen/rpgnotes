@@ -18,6 +18,7 @@
             <label>OAuth Client ID</label>
             <code class="copy-snippet">{{ claude_client_id }}</code>
         </div>
+        <p class="form-hint">The Client ID is fixed for your account — copy it once. Generating a secret below does not change it.</p>
 
         {% if flash_claude_secret %}
             <div class="flash-success token-reveal">
@@ -28,7 +29,7 @@
 
         <form method="post" action="{{ path('ai_access_claude_credentials') }}">
             <input type="hidden" name="_token" value="{{ csrf_token('ai_access_claude_credentials') }}">
-            <button type="submit" class="btn">{{ flash_claude_secret ? 'Regenerate Claude credentials' : 'Generate Claude credentials' }}</button>
+            <button type="submit" class="btn">{{ flash_claude_secret ? 'Regenerate Client Secret' : 'Generate Client Secret' }}</button>
         </form>
         <p class="form-hint">After adding the connector in Claude, your browser will open this site to log in and approve access.</p>
 

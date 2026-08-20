@@ -31,13 +31,34 @@ final class UserOAuthClientService
             return $client;
         }
 
-        $credentials = $this->regenerateForUser($user);
-        $client = $this->clients->findOneByClientId($credentials['clientId']);
-        if ($client === null) {
-            throw new \RuntimeException('OAuth client was not persisted.');
-        }
+        $clientId = 'rpg_'.bin2hex(random_bytes(16));
+        $secret = bin2hex(random_bytes(32));
+        $client = new UserOAuthClient(
+            $user,
+            $clientId,
+            $this->hashSecret($secret),
+            [self::CLAUDE_CALLBACK],
+        );
+        $this->em->persist($client);
+        $this->em->flush();
 
         return $client;
+    }
+
+    /**
+     * Issue a new client secret. The client ID stays the same so Claude settings
+     * copied earlier remain valid.
+     *
+     * @return array{clientId: string, clientSecret: string}
+     */
+    public function regenerateSecretForUser(User $user): array
+    {
+        $client = $this->ensureForUser($user);
+        $secret = bin2hex(random_bytes(32));
+        $client->setClientSecretHash($this->hashSecret($secret));
+        $this->em->flush();
+
+        return ['clientId' => $client->getClientId(), 'clientSecret' => $secret];
     }
 
     /**
@@ -45,23 +66,7 @@ final class UserOAuthClientService
      */
     public function regenerateForUser(User $user): array
     {
-        $clientId = 'rpg_'.bin2hex(random_bytes(16));
-        $secret = bin2hex(random_bytes(32));
-        $hash = $this->hashSecret($secret);
-
-        $client = $this->clients->findOneByUser($user);
-        if ($client === null) {
-            $client = new UserOAuthClient($user, $clientId, $hash, [self::CLAUDE_CALLBACK]);
-            $this->em->persist($client);
-        } else {
-            $client->setClientId($clientId);
-            $client->setClientSecretHash($hash);
-            $client->setRedirectUris([self::CLAUDE_CALLBACK]);
-        }
-
-        $this->em->flush();
-
-        return ['clientId' => $clientId, 'clientSecret' => $secret];
+        return $this->regenerateSecretForUser($user);
     }
 
     public function validateClient(string $clientId, string $redirectUri, ?string $clientSecret): ?UserOAuthClient

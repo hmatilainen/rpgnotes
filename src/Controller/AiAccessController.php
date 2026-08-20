@@ -77,7 +77,7 @@ final class AiAccessController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $credentials = $this->oauthClients->regenerateForUser($user);
+        $credentials = $this->oauthClients->regenerateSecretForUser($user);
         $this->addFlash('claude_oauth_secret', $credentials['clientSecret']);
 
         return $this->redirectToRoute('ai_access');

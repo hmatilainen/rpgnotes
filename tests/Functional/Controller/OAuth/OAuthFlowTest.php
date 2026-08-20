@@ -31,9 +31,9 @@ final class OAuthFlowTest extends WebTestCase
     public function testAuthorizationCodeFlowIssuesMcpAccessToken(): void
     {
         $client = static::createClient();
-        $player = $this->createPlayer('oauth-player');
+        $player = $this->createPlayer('oauth-flow-player');
         $oauthClients = static::getContainer()->get(UserOAuthClientService::class);
-        $credentials = $oauthClients->regenerateForUser($player);
+        $credentials = $oauthClients->regenerateSecretForUser($player);
         $config = static::getContainer()->get(OAuthServerConfig::class);
 
         [$verifier, $challenge] = $this->pkcePair();

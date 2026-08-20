@@ -54,6 +54,16 @@ final class UserOAuthClientServiceTest extends KernelTestCase
         self::assertSame($first->getClientId(), $second->getClientId());
     }
 
+    public function testRegenerateSecretKeepsClientId(): void
+    {
+        $first = $this->service->ensureForUser($this->user);
+        $result = $this->service->regenerateSecretForUser($this->user);
+
+        self::assertSame($first->getClientId(), $result['clientId']);
+        self::assertArrayHasKey('clientSecret', $result);
+        self::assertSame(64, strlen($result['clientSecret']));
+    }
+
     public function testRegenerateForUserReturnsNewCredentials(): void
     {
         $this->service->ensureForUser($this->user);
