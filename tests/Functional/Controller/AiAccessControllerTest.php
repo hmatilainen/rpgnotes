@@ -33,7 +33,20 @@ final class AiAccessControllerTest extends WebTestCase
 
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $em->createQuery('DELETE FROM App\Entity\UserApiToken')->execute();
+        $em->createQuery('DELETE FROM App\Entity\UserOAuthClient')->execute();
         $em->createQuery('DELETE FROM App\Entity\User')->execute();
+    }
+
+    public function testAiAccessShowsClaudeCredentials(): void
+    {
+        $client = static::createClient();
+        $player = $this->createPlayer('claude-player');
+
+        $client->loginUser($player);
+        $client->request('GET', '/ai-access');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('body', 'OAuth Client ID');
+        self::assertSelectorTextContains('body', 'rpg_');
     }
 
     public function testPlayerCanGenerateToken(): void

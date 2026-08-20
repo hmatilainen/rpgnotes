@@ -7,6 +7,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Service\Api\UserApiTokenService;
 use App\Service\OAuth\OAuthServerConfig;
+use App\Service\OAuth\OAuthTokenService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -21,6 +22,7 @@ final class ApiTokenAuthenticator extends AbstractAuthenticator
 {
     public function __construct(
         private readonly UserApiTokenService $apiTokens,
+        private readonly OAuthTokenService $oauthTokens,
         private readonly OAuthServerConfig $oauthConfig,
     ) {
     }
@@ -39,6 +41,9 @@ final class ApiTokenAuthenticator extends AbstractAuthenticator
 
         $rawToken = trim($matches[1]);
         $user = $this->apiTokens->findUserByRawToken($rawToken);
+        if ($user === null) {
+            $user = $this->oauthTokens->findUserByAccessToken($rawToken);
+        }
         if ($user === null || $user->getUsername() === null) {
             throw new CustomUserMessageAuthenticationException('Invalid API token.');
         }

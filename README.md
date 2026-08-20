@@ -86,16 +86,16 @@ search hidden content; admins see everything.
 2. Open **AI access** (`/ai-access`).
 3. Click **Generate API token**, copy the token immediately (it is only shown
    once). Regenerating invalidates the previous token.
-4. In your AI app, add a **custom MCP connector** (or equivalent) with:
-   - **URL** — the connector URL shown on `/ai-access` (your site's `/mcp` endpoint).
-   - **Auth** — Bearer token with the API token you generated.
+4. In your AI app, add a **custom MCP connector** (or equivalent):
+   - **Claude (web)** — paste **MCP URL**, **OAuth Client ID**, and **OAuth Client Secret** from `/ai-access` (Advanced settings), then approve access when Claude redirects you here.
+   - **Mistral / Cursor / ChatGPT** — paste the **Connector URL** and use your **API token** as Bearer/Token auth.
 
 Per-client notes (also on `/ai-access`):
 
 | Client | Free tier | Setup |
 |--------|-----------|--------|
-| **Claude** (web, Desktop, mobile) | Yes — one custom connector | Settings → Connectors → add custom connector; URL + `Authorization: Bearer …` header. |
-| **ChatGPT** | No — Plus / Pro / Business / Enterprise / Edu | Enable Developer mode; add connector with URL; auth type **Token**. |
+| **Claude** (web) | Yes — one custom connector | Settings → Connectors → paste MCP URL + OAuth Client ID + Secret from `/ai-access` (Advanced settings), then approve on this site. |
+| **ChatGPT** | No — Plus / Pro / Business / Enterprise / Edu | Enable Developer mode; add connector with URL; auth type **Token** (API token from `/ai-access`). |
 | **Mistral Le Chat** | Yes | Intelligence → Connectors → Custom MCP Connector; Bearer token when prompted. |
 | **Cursor** | — | Add an entry to `mcp.json` with the connector URL and `Authorization` header (snippet on `/ai-access` after generating a token). |
 

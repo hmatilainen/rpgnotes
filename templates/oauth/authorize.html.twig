@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Authorize Claude — RPG Notes{% endblock %}
+
+{% block body %}
+    <h1>Allow Claude to access your campaign notes?</h1>
+    <p class="form-intro">
+        Claude is requesting read access to the notes you can already see on this site
+        (session reports, lore, search via MCP). GM-only hidden notes stay hidden unless
+        you are logged in as an admin.
+    </p>
+
+    <section class="ai-access-panel">
+        <p><strong>Client ID:</strong> <code>{{ client_id }}</code></p>
+        <p><strong>Redirect:</strong> <code>{{ redirect_uri }}</code></p>
+
+        <form method="post" action="{{ path('oauth_authorize', {
+            response_type: 'code',
+            client_id: client_id,
+            redirect_uri: redirect_uri,
+            code_challenge: code_challenge,
+            code_challenge_method: code_challenge_method,
+            state: state,
+            resource: resource,
+            scope: scope,
+        }) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('oauth_authorize') }}">
+            <div class="form-actions">
+                <button type="submit" class="btn" name="allow" value="1">Allow</button>
+                <button type="submit" class="btn btn-secondary" name="deny" value="1">Deny</button>
+            </div>
+        </form>
+    </section>
+{% endblock %}

@@ -33,6 +33,7 @@ security:
         - { path: ^/\.well-known/oauth-, roles: PUBLIC_ACCESS }
         - { path: ^/oauth/token$, roles: PUBLIC_ACCESS, methods: [POST] }
         - { path: ^/oauth/register$, roles: PUBLIC_ACCESS, methods: [POST] }
+        - { path: ^/authorize, roles: ROLE_PLAYER }
         - { path: ^/mcp, roles: ROLE_PLAYER }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/reports, roles: ROLE_PLAYER }

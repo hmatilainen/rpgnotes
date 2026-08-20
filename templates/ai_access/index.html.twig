@@ -7,7 +7,40 @@
     <p class="form-intro">Use these campaign notes in Claude, ChatGPT, Mistral Le Chat, or Cursor — without scraping the website.</p>
 
     <section class="ai-access-panel">
-        <h2>Your connector</h2>
+        <h2>Claude (web)</h2>
+        <p>Copy these into Claude → <strong>Settings → Connectors → Add custom connector</strong> (expand <strong>Advanced settings</strong> for Client ID and Secret).</p>
+
+        <div class="snippet-block">
+            <label>Remote MCP server URL</label>
+            <code class="copy-snippet">{{ connector_url }}</code>
+        </div>
+        <div class="snippet-block">
+            <label>OAuth Client ID</label>
+            <code class="copy-snippet">{{ claude_client_id }}</code>
+        </div>
+
+        {% if flash_claude_secret %}
+            <div class="flash-success token-reveal">
+                <p><strong>OAuth Client Secret</strong> — copy it now. It will not be shown again.</p>
+                <code class="copy-snippet">{{ flash_claude_secret }}</code>
+            </div>
+        {% endif %}
+
+        <form method="post" action="{{ path('ai_access_claude_credentials') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('ai_access_claude_credentials') }}">
+            <button type="submit" class="btn">{{ flash_claude_secret ? 'Regenerate Claude credentials' : 'Generate Claude credentials' }}</button>
+        </form>
+        <p class="form-hint">After adding the connector in Claude, your browser will open this site to log in and approve access.</p>
+
+        <ol class="instruction-list">
+            <li>Paste the three values above into Claude’s custom connector form.</li>
+            <li>Click <strong>Add</strong> in Claude and complete the allow prompt on this site.</li>
+            <li>Enable the connector in a chat and ask about session reports or lore.</li>
+        </ol>
+    </section>
+
+    <section class="ai-access-panel">
+        <h2>API token (Mistral, Cursor, ChatGPT)</h2>
         <div class="snippet-block">
             <label>Connector URL</label>
             <code class="copy-snippet">{{ connector_url }}</code>
@@ -29,12 +62,6 @@
 
     {% if flash_token %}
         <section class="ai-access-panel">
-            <h2>Authorization header (Claude)</h2>
-            <p>In Claude connector <strong>Request headers</strong>, add:</p>
-            <pre class="snippet-pre"><code>Authorization: Bearer {{ flash_token }}</code></pre>
-        </section>
-
-        <section class="ai-access-panel">
             <h2>Cursor <code>mcp.json</code></h2>
             <pre class="snippet-pre"><code>{
   "mcpServers": {
@@ -48,18 +75,6 @@
 }</code></pre>
         </section>
     {% endif %}
-
-    <section class="ai-access-panel">
-        <h2>Claude (claude.ai, Desktop, mobile)</h2>
-        <p><strong>Free account:</strong> yes — one custom connector allowed.</p>
-        <ol class="instruction-list">
-            <li>Open <strong>Settings → Connectors</strong> (or Customize → Connectors).</li>
-            <li>Click <strong>Add custom connector</strong>.</li>
-            <li>Paste the <strong>Connector URL</strong> above.</li>
-            <li>Under <strong>Request headers</strong>, add <code>Authorization</code> with value <code>Bearer &lt;your token&gt;</code>.</li>
-            <li>Save and enable the connector in a chat.</li>
-        </ol>
-    </section>
 
     <section class="ai-access-panel">
         <h2>ChatGPT</h2>
