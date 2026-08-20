@@ -75,7 +75,7 @@ final class UserOAuthClientService
             return null;
         }
 
-        if ($clientSecret !== null && $this->hashSecret($clientSecret) !== $client->getClientSecretHash()) {
+        if ($clientSecret !== null && !hash_equals($client->getClientSecretHash(), $this->hashSecret($clientSecret))) {
             return null;
         }
 
