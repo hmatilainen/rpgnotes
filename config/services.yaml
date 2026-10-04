@@ -61,11 +61,7 @@ services:
             $reportsFolder: '@App\Service\Vault\ReportsFolder'
 
     League\CommonMark\ConverterInterface:
-        class: League\CommonMark\CommonMarkConverter
-        arguments:
-            $config:
-                html_input: 'escape'
-                allow_unsafe_links: false
+        factory: ['App\Service\Markdown\MarkdownConverterFactory', 'create']
 
     App\Service\Vault\VaultGitCheckout:
         arguments:
