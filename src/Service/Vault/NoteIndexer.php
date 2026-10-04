@@ -10,6 +10,7 @@ use App\Repository\NoteRepository;
 use App\Service\Markdown\CalloutStripper;
 use App\Service\Markdown\FrontmatterParser;
 use App\Service\Markdown\FrontmatterStripper;
+use App\Service\Markdown\ImageEmbedTransformer;
 use App\Service\Markdown\ImagePlaceholderStripper;
 use App\Service\Markdown\NoteDraft;
 use App\Service\Markdown\ReportFilenameParser;
@@ -31,6 +32,7 @@ class NoteIndexer
         private readonly FrontmatterStripper $frontmatterStripper,
         private readonly CalloutStripper $calloutStripper,
         private readonly ImagePlaceholderStripper $imageStripper,
+        private readonly ImageEmbedTransformer $imageEmbedTransformer,
         private readonly WikilinkTransformer $wikilinkTransformer,
         private readonly WikilinkExtractor $wikilinkExtractor,
         private readonly Slugifier $slugifier,
@@ -69,7 +71,10 @@ class NoteIndexer
                     $index,
                 );
 
-            $withLinks = $this->wikilinkTransformer->transform($draft->strippedContent, $index);
+            $withLinks = $this->wikilinkTransformer->transform(
+                $this->imageEmbedTransformer->transform($draft->strippedContent),
+                $index,
+            );
             $html = (string) $this->markdownConverter->convert($withLinks);
 
             $note = $this->notes->findOneByVaultPath($draft->vaultPath) ?? new Note();

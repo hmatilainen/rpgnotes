@@ -31,6 +31,11 @@ services:
         arguments:
             $excludedTopLevelDirs: '%app.vault.excluded_dirs%'
 
+    App\Service\Media\VaultMediaResolver:
+        arguments:
+            $vaultPath: '%env(VAULT_PATH)%'
+            $excludedTopLevelDirs: '%app.vault.excluded_dirs%'
+
     App\Service\Vault\ReportsFolder:
         arguments:
             $name: '%env(REPORTS_FOLDER)%'
