@@ -294,6 +294,14 @@ a:hover {
     margin-bottom: 0;
 }
 
+.content article img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1em 0;
+    border-radius: 4px;
+}
+
 .content article a[href^="/notes/"] {
     text-decoration: none;
     border-bottom: 1px dotted var(--color-accent);
