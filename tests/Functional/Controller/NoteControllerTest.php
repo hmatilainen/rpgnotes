@@ -161,6 +161,70 @@ final class NoteControllerTest extends WebTestCase
         self::assertStringNotContainsString('report-nav-next', $content);
     }
 
+    public function testSessionReportUsesFeaturedHeroPanelAndOlderSessionsList(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $this->makeReport($em, 1, 'reports/report-1');
+        $this->makeReport($em, 2, 'reports/report-2');
+        $this->makeReport($em, 3, 'reports/report-3');
+
+        $client->request('GET', '/notes/reports/report-2');
+
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('featured-report-hero', $content);
+        self::assertStringContainsString('Older Sessions', $content);
+        // Newest (#3) is featured on home, so skipped from the shared list.
+        self::assertStringNotContainsString('href="/notes/reports/report-3"', $content);
+        self::assertStringContainsString('href="/notes/reports/report-1"', $content);
+    }
+
+    public function testLoreNoteDoesNotUseFeaturedHeroOrOlderSessions(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $this->makeReport($em, 1, 'reports/report-1');
+
+        $note = new Note();
+        $note->setVaultPath('Locations/Millbrook.md');
+        $note->setSlug('locations/millbrook');
+        $note->setTitle('Millbrook');
+        $note->setTopLevelFolder('Locations');
+        $note->setHtml('<p>A quiet crossroads village.</p>');
+        $em->persist($note);
+        $em->flush();
+
+        $client->request('GET', '/notes/locations/millbrook');
+
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringNotContainsString('featured-report-hero', $content);
+        self::assertStringNotContainsString('Older Sessions', $content);
+    }
+
+    public function testSessionReportOlderSessionsPaginationPage2(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        for ($i = 1; $i <= 23; $i++) {
+            $this->makeReport($em, $i, 'reports/report-' . $i);
+        }
+
+        $client->request('GET', '/notes/reports/report-10?page=2');
+
+        self::assertResponseIsSuccessful();
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('featured-report-hero', $content);
+        self::assertStringContainsString('Page 2 of 2', $content);
+        self::assertStringContainsString('href="/notes/reports/report-2"', $content);
+        self::assertStringContainsString('href="/notes/reports/report-1"', $content);
+        self::assertStringNotContainsString('href="/notes/reports/report-3"', $content);
+    }
+
     private function makeReport(EntityManagerInterface $em, int $number, string $slug): Note
     {
         $note = new Note();
