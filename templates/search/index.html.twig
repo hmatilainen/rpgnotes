@@ -7,7 +7,10 @@
 
     <form method="get" action="{{ path('search') }}" class="search-page-form" role="search">
         <input type="search" name="q" value="{{ query }}" placeholder="Search notes…" aria-label="Search notes" autofocus>
-        <button type="submit" class="btn btn-small">Search</button>
+        <button type="submit" class="search-page-submit">
+            {% include 'partials/_icon.html.twig' with { name: 'search' } only %}
+            <span>Search</span>
+        </button>
     </form>
 
     {% if query == '' %}
@@ -15,6 +18,9 @@
     {% elseif hits is empty %}
         <p class="search-empty">No notes matched “{{ query }}”.</p>
     {% else %}
+        <p class="search-meta">
+            {{ hits|length }} result{% if hits|length != 1 %}s{% endif %} for “{{ query }}”
+        </p>
         <ul class="search-results">
             {% for hit in hits %}
                 <li>
