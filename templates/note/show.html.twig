@@ -32,29 +32,44 @@
     {% endfor %}
 
     {% if note.reportNumber is not null %}
-        {% include 'partials/_report_meta.html.twig' with { note: note } only %}
-    {% endif %}
-    <article>
-        {% if not (note.html|trim starts with '<h1') %}
-            <h1>{{ note.title }}</h1>
-        {% endif %}
-        {{ note.html|raw }}
-    </article>
-    {% include 'partials/_report_share.html.twig' with {note: note, isReport: isReport} only %}
-    {% if note.reportNumber is not null and (previousReport or nextReport) %}
-        <nav class="report-nav">
-            {% if previousReport %}
-                <a href="/notes/{{ previousReport.slug }}" class="report-nav-prev">
-                    {% include 'partials/_icon.html.twig' with { name: 'chevron-left' } only %}
-                    <span>Previous session</span>
-                </a>
+        <article class="featured-report featured-report-hero">
+            {% include 'partials/_report_meta.html.twig' with { note: note } only %}
+            {% if not (note.html|trim starts with '<h1') %}
+                <h1 class="featured-report-title">{{ note.title }}</h1>
             {% endif %}
-            {% if nextReport %}
-                <a href="/notes/{{ nextReport.slug }}" class="report-nav-next">
-                    <span>Next session</span>
-                    {% include 'partials/_icon.html.twig' with { name: 'chevron-right' } only %}
-                </a>
+            {{ note.html|raw }}
+            {% include 'partials/_report_share.html.twig' with {note: note, isReport: isReport} only %}
+            {% set showNextReport = nextReport and (not previousReport or reports|length == 0 or nextReport.reportNumber <= reports|first.reportNumber) %}
+            {% if previousReport or showNextReport %}
+                <nav class="report-nav">
+                    {% if previousReport %}
+                        <a href="/notes/{{ previousReport.slug }}" class="report-nav-prev">
+                            {% include 'partials/_icon.html.twig' with { name: 'chevron-left' } only %}
+                            <span>Previous session</span>
+                        </a>
+                    {% endif %}
+                    {% if showNextReport %}
+                        <a href="/notes/{{ nextReport.slug }}" class="report-nav-next">
+                            <span>Next session</span>
+                            {% include 'partials/_icon.html.twig' with { name: 'chevron-right' } only %}
+                        </a>
+                    {% endif %}
+                </nav>
             {% endif %}
-        </nav>
+        </article>
+        <h2 class="older-sessions-heading">Older Sessions</h2>
+        {% include 'partials/_older_sessions.html.twig' with {
+            reports: reports,
+            page: page,
+            totalPages: totalPages
+        } only %}
+    {% else %}
+        <article>
+            {% if not (note.html|trim starts with '<h1') %}
+                <h1>{{ note.title }}</h1>
+            {% endif %}
+            {{ note.html|raw }}
+        </article>
+        {% include 'partials/_report_share.html.twig' with {note: note, isReport: isReport} only %}
     {% endif %}
 {% endblock %}
