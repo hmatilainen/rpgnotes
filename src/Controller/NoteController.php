@@ -17,6 +17,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class NoteController extends AbstractController
 {
+    private const PER_PAGE = 20;
+
     public function __construct(
         private readonly NoteRepository $notes,
         private readonly SidebarBuilder $sidebar,
@@ -84,7 +86,7 @@ final class NoteController extends AbstractController
     }
 
     #[Route('/notes/{slug}', name: 'note_show', requirements: ['slug' => '.+'], priority: 0)]
-    public function __invoke(string $slug): Response
+    public function __invoke(string $slug, Request $request): Response
     {
         $note = $this->notes->findOneBySlug($slug);
         $isAdmin = $this->isGranted('ROLE_ADMIN');
@@ -94,14 +96,30 @@ final class NoteController extends AbstractController
         }
 
         $reportNumber = $note->getReportNumber();
+        $isReport = $reportNumber !== null;
+
+        $reports = [];
+        $page = 1;
+        $totalPages = 1;
+
+        if ($isReport) {
+            $page = max(1, $request->query->getInt('page', 1));
+            $reports = $this->notes->findReportsPaginated($page, self::PER_PAGE, $isAdmin);
+            $total = $this->notes->countReports($isAdmin);
+            $listTotal = max(0, $total - 1);
+            $totalPages = max(1, (int) ceil($listTotal / self::PER_PAGE));
+        }
 
         return $this->render('note/show.html.twig', [
             'note' => $note,
-            'previousReport' => $reportNumber !== null ? $this->notes->findPreviousReport($reportNumber, $isAdmin) : null,
-            'nextReport' => $reportNumber !== null ? $this->notes->findNextReport($reportNumber, $isAdmin) : null,
+            'previousReport' => $isReport ? $this->notes->findPreviousReport($reportNumber, $isAdmin) : null,
+            'nextReport' => $isReport ? $this->notes->findNextReport($reportNumber, $isAdmin) : null,
             'sidebar' => $this->sidebar->build($isAdmin),
-            'isReport' => $reportNumber !== null,
+            'isReport' => $isReport,
             'hiddenByFolderRule' => $isAdmin && $this->visibility->isHiddenByFolderRule($note),
+            'reports' => $reports,
+            'page' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 }
