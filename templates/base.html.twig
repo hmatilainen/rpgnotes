@@ -8,7 +8,23 @@
 </head>
 <body>
     <header class="navbar">
-        <a href="/">RPG Notes — Forgotten Realms</a>
+        <a href="/" class="navbar-brand">RPG Notes — Forgotten Realms</a>
+        <form method="get" action="{{ path('search') }}" class="navbar-search" role="search" data-search-root>
+            <label class="visually-hidden" for="navbar-search-q">Search notes</label>
+            <input
+                id="navbar-search-q"
+                type="search"
+                name="q"
+                value="{{ app.request.attributes.get('_route') == 'search' ? app.request.query.get('q') : '' }}"
+                placeholder="Search notes…"
+                autocomplete="off"
+                data-search-input
+            >
+            <button type="submit" class="navbar-search-submit" aria-label="Search">
+                {% include 'partials/_icon.html.twig' with { name: 'search' } only %}
+            </button>
+            <div class="navbar-search-dropdown" data-search-dropdown hidden></div>
+        </form>
         <nav class="navbar-auth">
             {% if app.user %}
                 <span>Logged in as {{ app.user.userIdentifier }}</span>
@@ -56,5 +72,6 @@
         </main>
     </div>
     <script defer src="/js/sidebar.js"></script>
+    <script defer src="/js/search.js"></script>
 </body>
 </html>
