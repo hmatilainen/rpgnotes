@@ -1,0 +1,37 @@
+<ul class="report-list">
+    {% for report in reports %}
+        <li>
+            <span class="report-list-main">
+                <a href="/notes/{{ report.slug }}" class="report-list-link">
+                    {% if report.reportNumber %}
+                        <span class="report-number-chip">#{{ report.reportNumber }}</span>
+                    {% endif %}
+                    <span>{{ report.title }}</span>
+                </a>
+                {% if report.sessionDate %}
+                    <span class="report-date">{{ report.sessionDate|date('d.m.Y') }}</span>
+                {% endif %}
+            </span>
+            <a href="{{ path('note_share_whatsapp', {slug: report.slug}) }}" class="report-share-link icon-link">
+                {% include 'partials/_icon.html.twig' with { name: 'share', class: 'icon icon--sm' } only %}
+                <span>Share</span>
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+
+<nav class="pagination">
+    {% if page > 1 %}
+        <a href="?page={{ page - 1 }}" class="icon-link">
+            {% include 'partials/_icon.html.twig' with { name: 'chevron-left', class: 'icon icon--sm' } only %}
+            <span>Previous</span>
+        </a>
+    {% endif %}
+    <span>Page {{ page }} of {{ totalPages }}</span>
+    {% if page < totalPages %}
+        <a href="?page={{ page + 1 }}" class="icon-link">
+            <span>Next</span>
+            {% include 'partials/_icon.html.twig' with { name: 'chevron-right', class: 'icon icon--sm' } only %}
+        </a>
+    {% endif %}
+</nav>
