@@ -39,8 +39,7 @@
             {% endif %}
             {{ note.html|raw }}
             {% include 'partials/_report_share.html.twig' with {note: note, isReport: isReport} only %}
-            {% set showNextReport = nextReport and (not previousReport or reports|length == 0 or nextReport.reportNumber <= reports|first.reportNumber) %}
-            {% if previousReport or showNextReport %}
+            {% if previousReport or nextReport %}
                 <nav class="report-nav">
                     {% if previousReport %}
                         <a href="/notes/{{ previousReport.slug }}" class="report-nav-prev">
@@ -48,7 +47,7 @@
                             <span>Previous session</span>
                         </a>
                     {% endif %}
-                    {% if showNextReport %}
+                    {% if nextReport %}
                         <a href="/notes/{{ nextReport.slug }}" class="report-nav-next">
                             <span>Next session</span>
                             {% include 'partials/_icon.html.twig' with { name: 'chevron-right' } only %}

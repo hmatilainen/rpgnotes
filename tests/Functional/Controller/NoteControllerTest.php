@@ -176,9 +176,13 @@ final class NoteControllerTest extends WebTestCase
         $content = (string) $client->getResponse()->getContent();
         self::assertStringContainsString('featured-report-hero', $content);
         self::assertStringContainsString('Older Sessions', $content);
-        // Newest (#3) is featured on home, so skipped from the shared list.
-        self::assertStringNotContainsString('href="/notes/reports/report-3"', $content);
+        // Newest (#3) is featured on home, so skipped from the shared list (not from session nav).
+        self::assertDoesNotMatchRegularExpression(
+            '/class="report-list-link"[^>]*href="\/notes\/reports\/report-3"|href="\/notes\/reports\/report-3"[^>]*class="report-list-link"/',
+            $content
+        );
         self::assertStringContainsString('href="/notes/reports/report-1"', $content);
+        self::assertStringContainsString('href="/notes/reports/report-3" class="report-nav-next"', $content);
     }
 
     public function testLoreNoteDoesNotUseFeaturedHeroOrOlderSessions(): void
