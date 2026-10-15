@@ -13,8 +13,11 @@ use Doctrine\ORM\EntityManagerInterface;
 
 final class OAuthTokenService
 {
-    private const ACCESS_TTL_SECONDS = 3600;
-    private const REFRESH_TTL_SECONDS = 2592000;
+    /** Match website login cookie lifetime — avoid hourly Claude reconnect/400 noise. */
+    private const ACCESS_TTL_SECONDS = 31536000;
+
+    /** Longer than access so Claude can silently refresh near expiry without re-consent. */
+    private const REFRESH_TTL_SECONDS = 63072000;
 
     public function __construct(
         private readonly OAuthAccessTokenRepository $accessTokens,

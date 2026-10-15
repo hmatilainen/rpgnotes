@@ -14,3 +14,6 @@ mcp:
         path: /mcp
         # Public server behind Apache TLS — Mistral/Claude connect server-side with varying Origin headers.
         allowed_hosts: false
+        session:
+            # Align with OAuth access token / site cookie (1 year) so MCP sessions outlast hourly reconnects.
+            ttl: 31536000
